@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments
+.venv/
+venv/
+.env
+
+# Build
+build/
+dist/
+
+# OS/editor
+.DS_Store
+*.swp
+*.swo
+
+# FCV real/generated data
+data/
+out/
+
+# Generated demo artifacts
+examples/cli_run/
+examples/demo_inputs/
+examples/demo_bandwidth.csv
+examples/demo_gate_report.md
+examples/panel_demo/
+examples/panel_demo_cli_run/
+examples/synthetic_grid/
+examples/synthetic_grid_viability.csv
+
+# Logs
+*.log
