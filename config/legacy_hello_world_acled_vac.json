@@ -1,0 +1,25 @@
+{
+  "experiment_id": "legacy_fcv_acled_vac_hello_world",
+  "outcome": "acled_deaths_violence_against_civilians",
+  "treatment_type": "cnwb_pooled",
+  "unit_col": "GID",
+  "period_col": "TimePeriod",
+  "period_order_col": "Period",
+  "country_col": "ISO",
+  "wb_amount_col": "wbad_amount_usd",
+  "cn_amount_col": "cn_amount_usd",
+  "covariates": [
+    "popsum"
+  ],
+  "include_pre_outcome": true,
+  "require_declared_covariates": true,
+  "min_treated": 30,
+  "min_control": 30,
+  "max_outcome_missing_share": 0.25,
+  "max_zero_share": 0.95,
+  "max_abs_pre_smd": 0.25,
+  "plausible_effect_sd": -0.2,
+  "power_target": 0.8,
+  "bootstrap_draws": 200,
+  "seed": 20260817
+}
