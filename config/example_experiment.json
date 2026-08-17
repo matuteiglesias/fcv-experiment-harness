@@ -1,0 +1,30 @@
+{
+  "experiment_id": "fcv_demo_v0",
+  "outcome": "outcome_post",
+  "pre_outcome": "outcome_pre",
+  "radius_km": 30,
+  "bandwidth_grid_km": [
+    10,
+    20,
+    30,
+    40,
+    50
+  ],
+  "covariates": [
+    "baseline_risk",
+    "population_z"
+  ],
+  "fixed_effects": [
+    "country",
+    "round"
+  ],
+  "min_completed": 30,
+  "min_planned": 30,
+  "max_ambiguous_share": 0.1,
+  "max_abs_pre_smd": 0.25,
+  "placebo_max_abs_effect": 0.2,
+  "plausible_effect": -0.2,
+  "power_target": 0.8,
+  "bootstrap_draws": 200,
+  "seed": 20260817
+}
