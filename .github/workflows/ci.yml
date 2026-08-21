@@ -5,20 +5,22 @@ on:
     paths:
       - ".github/workflows/ci.yml"
       - "config/**"
+      - "data/reg_data/**"
       - "examples/**"
       - "fcv_harness/**"
       - "pyproject.toml"
-      - "tests_smoke.py"
+      - "tests_*.py"
   push:
     branches:
       - main
     paths:
       - ".github/workflows/ci.yml"
       - "config/**"
+      - "data/reg_data/**"
       - "examples/**"
       - "fcv_harness/**"
       - "pyproject.toml"
-      - "tests_smoke.py"
+      - "tests_*.py"
 
 permissions:
   contents: read
@@ -47,5 +49,46 @@ jobs:
       - name: Compile package
         run: python -m compileall -q fcv_harness
 
-      - name: Run synthetic smoke test
-        run: python tests_smoke.py
+      - name: Run synthetic smoke tests
+        run: |
+          python tests_smoke.py
+          python tests_canonical.py
+          python tests_experiment_semantics.py
+          python tests_analysis_surface.py
+          python tests_country_identity.py
+
+      - name: Run real E1 analysis-surface checkpoint
+        run: |
+          python -m fcv_harness.analysis_surface_cli \
+            --surface-manifest config/analysis_surface_a2_T2_y2001.json \
+            --experiment-manifest config/resolved_wbad_record_acled_vac.json \
+            --base-dir . \
+            --out-dir out-ci/e1
+
+      - name: Show real E1 gates and resolved E0
+        run: |
+          echo '--- analysis_surface_gates.csv ---'
+          cat out-ci/e1/analysis_surface_gates.csv
+          echo '--- unresolved country GIDs ---'
+          cat out-ci/e1/unparsed_country_gids.csv
+          echo '--- resolved input_eligibility.csv ---'
+          cat out-ci/e1/resolved_preflight/input_eligibility.csv
+          echo '--- resolved treatment_support_by_period.csv ---'
+          cat out-ci/e1/resolved_preflight/treatment_support_by_period.csv
+
+      - name: Upload E1 acceptance artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-analysis-surface-checkpoint
+          path: |
+            out-ci/e1/analysis_surface_card.md
+            out-ci/e1/analysis_surface_gates.csv
+            out-ci/e1/analysis_universe_country_profile.csv
+            out-ci/e1/unparsed_country_gids.csv
+            out-ci/e1/acled_measurement_audit_overall.csv
+            out-ci/e1/acled_measurement_audit_by_period.csv
+            out-ci/e1/acled_measurement_audit_by_country.csv
+            out-ci/e1/source_outside_lattice_by_country.csv
+            out-ci/e1/resolved_preflight/experiment_preflight.md
+            out-ci/e1/resolved_preflight/input_eligibility.csv
+            out-ci/e1/resolved_preflight/treatment_support_by_period.csv
