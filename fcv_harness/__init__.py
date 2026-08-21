@@ -15,3 +15,19 @@ from .canonical import (
     run_canonical_checkpoint,
     write_checkpoint_outputs,
 )
+from .lattice_diagnostics import (
+    derive_country_iso3,
+    attach_country_iso3,
+    build_source_outside_lattice_diagnostics,
+)
+from .canonical_experiment import (
+    TreatmentMeasurementSpec,
+    EligibilitySpec,
+    OutcomeMeasurementSpec,
+    CanonicalPanelExperimentSpec,
+    resolve_treatment_measurement,
+    resolve_outcome_measurement,
+    prepare_experiment_measurement_frame,
+    build_input_eligibility_report,
+    run_experiment_preflight,
+)
