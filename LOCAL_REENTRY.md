@@ -1,47 +1,38 @@
-# FCV local re-entry: first real-data run
+# FCV local re-entry — canonical path first
 
-The recovered 2023 architecture has two separate GID×TimePeriod surfaces:
+> **Current guidance:** use [`CANONICAL_CHECKPOINT.md`](./CANONICAL_CHECKPOINT.md) before running a real area-period experiment.
+>
+> The earlier `panel_cli` route below is retained as a legacy compatibility path. New evidence from the surviving 2023 files showed that `*_DHSGC.csv` is best treated as the dense covariate lattice, while project exposures and outcomes survive as separate `agg_*` source surfaces.
 
-1. treatment/covariates, e.g. `africaa2T22001_DHSGC.csv`;
-2. outcomes, e.g. `africaa2_T22001.csv`.
+## Recommended real-data entry
 
-The old regression prototype explicitly used:
-
-```text
-acled_deaths_violence_against_civilians
-```
-
-as a violence outcome. Treat it as a **legacy hello-world outcome**, not yet the final canonical FCV outcome.
-
-## 1. Scan empirical support before selecting a lane
-
-From the empirical-study directory:
+For the frozen ADM2 / T2 / y0=2001 checkpoint:
 
 ```bash
-python -m fcv_harness.grid_scan \
-  --glob "data/reg_data/*_DHSGC.csv" \
-  --out "out/fcv_grid_viability.csv" \
-  --treatment-type cnwb_pooled
+python -m fcv_harness.canonical_cli \
+  --manifest config/canonical_a2_T2_y2001.json \
+  --base-dir . \
+  --out-dir out/canonical_a2_T2_y2001
 ```
 
-This answers a cheap question first: where do treated/control support and usable time periods actually exist?
+Read in this order:
 
-## 2. First lane to inspect
+1. `canonical_panel_card.md`
+2. `canonical_gates.csv`
+3. `source_inventory.csv`
+4. `key_integrity.csv`
+5. `period_coverage.csv`
+6. `project_exposure_profile.csv`
+7. `wb_source_comparison.csv`
+8. `merge_audit.json`
+9. `covariate_profile.csv`
+10. `canonical_panel_sample.csv`
 
-Default only until the data gates say otherwise:
+This checkpoint deliberately stops before treatment selection, `t → t+1` outcome shifting, matching, or regression.
 
-```text
-geography: ADM2
-T: 2 years
-y0: 2001
-treatment: cnwb_pooled
-outcome: acled_deaths_violence_against_civilians
-covariate: popsum
-```
+## Legacy panel experiment route
 
-This is not a final scientific specification. It is the shortest route to an end-to-end real-data calibration run.
-
-## 3. Run the real hello-world experiment
+The previous reconstructed hello-world experiment expected a treatment/covariate panel plus a separate outcome table:
 
 ```bash
 python -m fcv_harness.panel_cli \
@@ -51,18 +42,13 @@ python -m fcv_harness.panel_cli \
   --out-dir "out/hello_world_adm2_T2_y2001"
 ```
 
-Read in this order:
+That route remains useful for synthetic/compatibility tests, but should not be treated as the authoritative ingestion path for the newly inspected real files. The next experiment wave will adapt `PanelExperimentSpec` to consume treatment/outcome definitions from the canonical panel instead of assuming raw WB/CN amount columns already live in `_DHSGC.csv`.
 
-1. `outcome_merge_audit.json`
-2. `gate_report.md`
-3. `support_by_period.csv`
-4. `analysis_frame.csv`
-5. **only then** `baseline_estimate.csv`
+## Interpretation policy
 
-## 4. Interpretation policy
-
-- RED merge/data/support gate → repair data or choose another experiment.
-- RED placebo/signal-recovery gate → do not interpret the baseline coefficient as evidence.
-- GREEN gates → permission to investigate, not proof of causality.
-- Baseline OLS is calibration only.
-- Do not add the full historical covariate set until each variable is audited for meaning and treatment timing.
+- A failed canonical-data gate is evidence about the inherited measurement substrate.
+- Do not modify source semantics merely to obtain a better regression result.
+- Legacy `jobcat` values remain unchanged at this checkpoint.
+- Project-record presence and positive reported amount remain distinct facts.
+- WBad and WBkg remain separate source implementations.
+- Absent ACLED rows remain absent until zero-versus-missing semantics are explicitly resolved.
