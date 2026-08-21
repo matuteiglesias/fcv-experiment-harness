@@ -1,0 +1,51 @@
+name: Harness CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/ci.yml"
+      - "config/**"
+      - "examples/**"
+      - "fcv_harness/**"
+      - "pyproject.toml"
+      - "tests_smoke.py"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ci.yml"
+      - "config/**"
+      - "examples/**"
+      - "fcv_harness/**"
+      - "pyproject.toml"
+      - "tests_smoke.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: harness-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+
+      - name: Compile package
+        run: python -m compileall -q fcv_harness
+
+      - name: Run synthetic smoke test
+        run: python tests_smoke.py
