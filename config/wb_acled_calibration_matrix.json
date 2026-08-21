@@ -1,0 +1,52 @@
+{
+  "matrix_id": "wb_acled_vac_a2_T2_y2001_v0",
+  "surface_manifest": "config/analysis_surface_a2_T2_y2001.json",
+  "treatment_period_start": "2003-2004",
+  "treatment_period_end": "2013-2014",
+  "annotation_version": "legacy_2023",
+  "unit_col": "GID",
+  "period_col": "TimePeriod",
+  "country_col": "country_iso3",
+  "cells": [
+    {
+      "cell_id": "wbad_record_present",
+      "source": "wbad",
+      "definition": "record_present",
+      "role": "PRIMARY"
+    },
+    {
+      "cell_id": "wbkg_record_present",
+      "source": "wbkg",
+      "definition": "record_present",
+      "role": "PRIMARY"
+    },
+    {
+      "cell_id": "wbad_amount_positive",
+      "source": "wbad",
+      "definition": "amount_positive",
+      "role": "STRESS"
+    },
+    {
+      "cell_id": "wbkg_amount_positive",
+      "source": "wbkg",
+      "definition": "amount_positive",
+      "role": "STRESS"
+    }
+  ],
+  "thresholds": {
+    "min_treated": 30,
+    "min_control": 30,
+    "min_mixed_periods": 2,
+    "max_zero_share_green": 0.95,
+    "max_zero_share_red": 0.99,
+    "max_abs_pre_smd_green": 0.25,
+    "max_abs_pre_smd_red": 0.50,
+    "max_placebo_std_green": 0.10,
+    "max_placebo_std_red": 0.25,
+    "plausible_effect_sd": 0.20,
+    "signal_draws": 30,
+    "signal_target_green": 0.80,
+    "signal_target_red": 0.50,
+    "seed": 20260821
+  }
+}
