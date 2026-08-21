@@ -77,6 +77,8 @@ jobs:
         run: |
           echo '--- measurement_stability.csv ---'
           cat out-ci/e2/measurement_stability.csv
+          echo '--- wb_measurement_agreement.csv ---'
+          cat out-ci/e2/wb_measurement_agreement.csv
           echo '--- cell_gates.csv ---'
           cat out-ci/e2/cell_gates.csv
           echo '--- WBad amount-positive period support ---'
@@ -107,6 +109,7 @@ jobs:
             out-ci/e2/calibration_matrix_card.md
             out-ci/e2/calibration_matrix_contract.json
             out-ci/e2/measurement_stability.csv
+            out-ci/e2/wb_measurement_agreement.csv
             out-ci/e2/cell_gates.csv
             out-ci/e2/cells/*/gates.csv
             out-ci/e2/cells/*/support_by_period.csv
