@@ -8,7 +8,7 @@ on:
       - "examples/**"
       - "fcv_harness/**"
       - "pyproject.toml"
-      - "tests_smoke.py"
+      - "tests_*.py"
   push:
     branches:
       - main
@@ -18,7 +18,7 @@ on:
       - "examples/**"
       - "fcv_harness/**"
       - "pyproject.toml"
-      - "tests_smoke.py"
+      - "tests_*.py"
 
 permissions:
   contents: read
@@ -47,5 +47,9 @@ jobs:
       - name: Compile package
         run: python -m compileall -q fcv_harness
 
-      - name: Run synthetic smoke test
-        run: python tests_smoke.py
+      - name: Run synthetic smoke tests
+        run: |
+          python tests_smoke.py
+          python tests_canonical.py
+          python tests_experiment_semantics.py
+          python tests_analysis_surface.py
