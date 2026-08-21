@@ -23,6 +23,8 @@ HARNESS CANONICALIZATION
         ↓
 canonical GID × TimePeriod panel + panel card
         ↓
+explicit analysis universe + outcome measurement semantics
+        ↓
 measurement semantics + E0 eligibility preflight
         ↓
 experiment specification
@@ -146,13 +148,13 @@ cn.record_present         cn.amount_positive
 
 Treatment resolution produces an explicit nullable `treatment`, `eligible`, `treatment_provenance`, and `treatment_measurement_status`. Rows outside the declared experiment window are not silently recoded as controls.
 
-The outcome contract also requires an explicit absent-record policy. The first ACLED manifest uses:
+The initial outcome contract uses:
 
 ```text
 absent_record_policy = unresolved
 ```
 
-so the expected preflight state is **ESTIMATION BLOCKED**. This is deliberate: ACLED zero-versus-absence semantics must be resolved before complete-case regression can accidentally select on observed conflict records.
+so its expected preflight state is **ESTIMATION BLOCKED**. This is deliberate: complete-case regression must not silently select on observed conflict records.
 
 The preflight emits:
 
@@ -170,6 +172,59 @@ experiment_contract.json
 `E0_INPUT_ELIGIBILITY` reports source/lattice attrition, treated/control support, next-period outcome record/value coverage, and whether the declared measurement policy permits estimation. No coefficient is produced.
 
 Read `EXPERIMENT_PREFLIGHT.md` for the semantic contract and stop rules.
+
+## E1 — analysis universe and ACLED measurement resolution
+
+The real-data preflight showed that `_DHSGC` is a covariate lattice with meaningful source attrition, not automatically a complete ADM2-Africa universe. E1 therefore promotes the analysis universe to an explicit object.
+
+The repository does not yet contain an independent full-ADM2 geography spine, so the production E1 manifest declares:
+
+```text
+mode       canonical_lattice
+authority  dhsgc_restricted_legacy_2023
+```
+
+This means current experiments are explicitly **DHSGC-restricted**. The harness also supports an `external_gid_spine` mode for the later point when a trustworthy full ADM2 spine is recovered; in that mode DHSGC becomes an attached covariate surface with `dhsgc_available` rather than an eligibility requirement.
+
+E1 also resolves the inherited sparse ACLED aggregate semantics explicitly:
+
+```text
+policy                    zero_within_verified_coverage
+verified period window    1997-1998 through 2021-2022
+verified geography scope  analysis_universe
+coverage basis             legacy_2023_acled_africa_aggregate_zero_fill
+```
+
+An absent ACLED row is converted to zero only inside that declared coverage scope. Raw values, resolved values, record presence, coverage eligibility and resolution status remain separate fields.
+
+Run:
+
+```bash
+python tests_analysis_surface.py
+
+python -m fcv_harness.analysis_surface_cli \
+  --surface-manifest config/analysis_surface_a2_T2_y2001.json \
+  --experiment-manifest config/resolved_wbad_record_acled_vac.json \
+  --base-dir . \
+  --out-dir out/analysis_surface_a2_T2_y2001
+```
+
+The E1 checkpoint emits an `analysis_surface_card.md`, universe/country diagnostics, ACLED measurement audits by period and country, a resolved area-period panel, and a `resolved_preflight/` subdirectory that reruns E0 under the explicit zero-within-coverage policy. E1 still runs **no treatment-effect estimator**.
+
+Its gates are:
+
+```text
+U0_UNIVERSE_DECLARED
+U1_SOURCE_ATTRITION_QUANTIFIED
+A0_ACLED_POLICY_EXPLICIT
+A1_ACLED_RESOLUTION_COMPLETENESS
+A2_ACLED_STRUCTURAL_ZERO_PROFILE
+A3_ACLED_COVERAGE_PROVENANCE
+```
+
+`U1`, `A2`, and `A3` may remain YELLOW for scientifically meaningful reasons. `A1` is a hard stop if unresolved or record-present missing outcome values survive inside the declared coverage treatment.
+
+Read `ANALYSIS_SURFACE.md` for the E1 human acceptance guide.
 
 ## Authority boundary
 
@@ -227,7 +282,7 @@ The main project-state concepts remain `planned`, `active`, `completed`, `ambigu
 
 `fcv_harness.panel_cli` is retained as a compatibility/archaeological adapter. It reflects the earlier reconstruction in which treatment amount columns were expected to be present in the panel and then shifted directly into a calibration regression.
 
-The recovered source evidence showed that `_DHSGC.csv` is more accurately treated as the dense covariate lattice, while project exposures and outcomes survive as separate `agg_*` surfaces. New real-data work should therefore pass through the canonical checkpoint and canonical experiment preflight instead of using source-specific logic inside the legacy estimator adapter.
+The recovered source evidence showed that `_DHSGC.csv` is more accurately treated as the dense covariate lattice, while project exposures and outcomes survive as separate `agg_*` surfaces. New real-data work should therefore pass through canonicalization, universe/outcome resolution, and canonical experiment preflight instead of using source-specific logic inside the legacy estimator adapter.
 
 The existing panel gates and baseline estimator remain useful downstream:
 
@@ -246,7 +301,8 @@ The baseline OLS is calibration only, not the final staggered-treatment estimato
 - revising the legacy 2023 jobs/non-jobs annotation;
 - deciding whether project-record presence or positive amount is the preferred exposure definition;
 - reconciling WBad versus WBkg into a preferred World Bank source;
-- declaring absent ACLED rows to be structural zeroes;
+- recovering an independent full-ADM2 geography spine beyond the DHSGC-restricted universe;
+- independently rebuilding/validating raw ACLED coverage instead of inheriting the legacy aggregate zero semantics;
 - canonical period-varying population processing;
 - modern staggered-adoption/event-study estimators;
 - spatial-spillover estimators;
