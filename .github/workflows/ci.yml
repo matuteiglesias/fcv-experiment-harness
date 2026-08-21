@@ -56,6 +56,7 @@ jobs:
           python tests_experiment_semantics.py
           python tests_analysis_surface.py
           python tests_country_identity.py
+          python tests_calibration.py
 
       - name: Run real E1 analysis-surface checkpoint
         run: |
@@ -65,16 +66,21 @@ jobs:
             --base-dir . \
             --out-dir out-ci/e1
 
-      - name: Show real E1 gates and resolved E0
+      - name: Run real E2 WB ACLED calibration matrix
         run: |
-          echo '--- analysis_surface_gates.csv ---'
-          cat out-ci/e1/analysis_surface_gates.csv
-          echo '--- unresolved country GIDs ---'
-          cat out-ci/e1/unparsed_country_gids.csv
-          echo '--- resolved input_eligibility.csv ---'
-          cat out-ci/e1/resolved_preflight/input_eligibility.csv
-          echo '--- resolved treatment_support_by_period.csv ---'
-          cat out-ci/e1/resolved_preflight/treatment_support_by_period.csv
+          python -m fcv_harness.calibration_cli \
+            --matrix-manifest config/wb_acled_calibration_matrix.json \
+            --base-dir . \
+            --out-dir out-ci/e2
+
+      - name: Show real E2 stability and gates
+        run: |
+          echo '--- measurement_stability.csv ---'
+          cat out-ci/e2/measurement_stability.csv
+          echo '--- cell_gates.csv ---'
+          cat out-ci/e2/cell_gates.csv
+          echo '--- WBad amount-positive period support ---'
+          cat out-ci/e2/cells/wbad_amount_positive/support_by_period.csv
 
       - name: Upload E1 acceptance artifact
         uses: actions/upload-artifact@v4
@@ -92,3 +98,18 @@ jobs:
             out-ci/e1/resolved_preflight/experiment_preflight.md
             out-ci/e1/resolved_preflight/input_eligibility.csv
             out-ci/e1/resolved_preflight/treatment_support_by_period.csv
+
+      - name: Upload E2 calibration artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2-wb-acled-calibration
+          path: |
+            out-ci/e2/calibration_matrix_card.md
+            out-ci/e2/calibration_matrix_contract.json
+            out-ci/e2/measurement_stability.csv
+            out-ci/e2/cell_gates.csv
+            out-ci/e2/cells/*/gates.csv
+            out-ci/e2/cells/*/support_by_period.csv
+            out-ci/e2/cells/*/placebo.csv
+            out-ci/e2/cells/*/signal_recovery.csv
+            out-ci/e2/cells/*/estimate.csv
