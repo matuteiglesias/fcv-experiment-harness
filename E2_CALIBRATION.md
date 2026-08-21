@@ -73,6 +73,38 @@ E6 first fits the nuisance structure without treatment, then performs GID-level 
 
 This is calibration of detectability. It is not evidence that a real treatment effect exists.
 
+### Detectability scale
+
+For every estimated cell, `measurement_stability.csv` also reports:
+
+```text
+outcome_sd
+effect_sd
+95% coefficient interval
+mde80_raw_approx
+mde80_sd_approx
+```
+
+The approximate 80% minimum-detectable effect uses `2.80 × clustered SE` and is shown both in raw VAC deaths and outcome-SD units. It is a compact way to distinguish an unstable point estimate from an effect that is simply much smaller than the current design can resolve.
+
+### WBad / WBkg treatment agreement
+
+`wb_measurement_agreement.csv` compares the two WB source surfaces over the exact declared treatment window for both `record_present` and `amount_positive`.
+
+For every period and overall it reports:
+
+```text
+both treated
+WBad only
+WBkg only
+neither
+treated union
+Jaccard among treated cells
+exact agreement share
+```
+
+This is a measurement diagnostic only. It does not reconcile the two sources or choose a preferred one.
+
 ## Run
 
 ```bash
@@ -95,13 +127,14 @@ python -m fcv_harness.calibration_cli \
 
 1. `calibration_matrix_card.md`
 2. `measurement_stability.csv`
-3. `cell_gates.csv`
-4. `cells/wbad_record_present/support_by_period.csv`
-5. `cells/wbkg_record_present/support_by_period.csv`
-6. `cells/wbad_amount_positive/support_by_period.csv`
-7. `cells/wbkg_amount_positive/support_by_period.csv`
-8. each cell's `placebo.csv` and `signal_recovery.csv`
-9. only then each cell's `estimate.csv`
+3. `wb_measurement_agreement.csv`
+4. `cell_gates.csv`
+5. `cells/wbad_record_present/support_by_period.csv`
+6. `cells/wbkg_record_present/support_by_period.csv`
+7. `cells/wbad_amount_positive/support_by_period.csv`
+8. `cells/wbkg_amount_positive/support_by_period.csv`
+9. each cell's `placebo.csv` and `signal_recovery.csv`
+10. only then each cell's `estimate.csv`
 
 The intended primary table is `measurement_stability.csv`, not a ranking of p-values.
 
@@ -111,6 +144,8 @@ The primary scientific question at this stage is:
 
 > Does the empirical signal and the validity profile remain reasonably stable when the same WB exposure is measured through WBad versus WBkg?
 
+Read the point estimates jointly with treatment agreement and the approximate detectable-effect scale. A sign difference between two imprecise estimates is not, by itself, evidence of contradictory causal effects; it may instead reflect source disagreement plus effects that are below the resolution of the current calibration design.
+
 The `amount_positive` cells are stress tests of the inherited amount-based treatment proxy. They are not promoted over record presence because they happen to produce a more attractive coefficient.
 
-After E2, the next decision should be based on the **joint pattern** of source stability, support, placebo behavior and signal recovery. More sophisticated estimators should only be added after we know which empirical object is worth estimating.
+After E2, the next decision should be based on the **joint pattern** of source stability, support, source agreement, placebo behavior and signal recovery. More sophisticated estimators should only be added after we know which empirical object is worth estimating.
