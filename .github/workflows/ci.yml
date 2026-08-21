@@ -55,6 +55,7 @@ jobs:
           python tests_canonical.py
           python tests_experiment_semantics.py
           python tests_analysis_surface.py
+          python tests_country_identity.py
 
       - name: Run real E1 analysis-surface checkpoint
         run: |
@@ -68,8 +69,8 @@ jobs:
         run: |
           echo '--- analysis_surface_gates.csv ---'
           cat out-ci/e1/analysis_surface_gates.csv
-          echo '--- unresolved country GIDs (first 40) ---'
-          head -40 out-ci/e1/unparsed_country_gids.csv
+          echo '--- unresolved country GIDs ---'
+          cat out-ci/e1/unparsed_country_gids.csv
           echo '--- resolved input_eligibility.csv ---'
           cat out-ci/e1/resolved_preflight/input_eligibility.csv
           echo '--- resolved treatment_support_by_period.csv ---'
