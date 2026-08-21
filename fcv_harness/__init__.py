@@ -31,3 +31,14 @@ from .canonical_experiment import (
     build_input_eligibility_report,
     run_experiment_preflight,
 )
+from .analysis_surface import (
+    AnalysisUniverseSpec,
+    AreaPeriodOutcomeResolutionSpec,
+    AnalysisSurfaceSpec,
+    build_analysis_universe,
+    resolve_area_period_outcome,
+    attach_resolved_outcome,
+    build_acled_measurement_audit,
+    run_analysis_surface_checkpoint,
+    write_analysis_surface_outputs,
+)
