@@ -23,6 +23,8 @@ HARNESS CANONICALIZATION
         ↓
 canonical GID × TimePeriod panel + panel card
         ↓
+measurement semantics + E0 eligibility preflight
+        ↓
 experiment specification
         ↓
 experiment gates
@@ -45,7 +47,7 @@ The source manifest is:
 config/canonical_a2_T2_y2001.json
 ```
 
-and expects local/linked files under `data/reg_data/`. The whole `data/` tree remains Git-ignored.
+and expects local/linked files under `data/reg_data/`.
 
 ## Canonical panel checkpoint
 
@@ -87,6 +89,9 @@ project_exposure_profile.csv
 wb_source_comparison.csv
 covariate_profile.csv
 merge_audit.json
+source_only_keys.csv
+source_outside_lattice_by_country.csv
+source_outside_lattice_by_period.csv
 canonical_panel_sample.csv
 canonical_panel.csv.gz
 ```
@@ -105,9 +110,66 @@ The checkpoint currently reports:
 - `C5_WB_SOURCE_COMPARISON`
 - `C6_COVARIATE_PROFILE`
 
-Some YELLOW gates are expected. In particular, zero-amount project records, sparse ACLED row presence, and differences between the two World Bank source implementations are deliberately exposed rather than silently repaired.
+Some YELLOW gates are expected. In particular, zero-amount project records, sparse ACLED row presence, differences between the two World Bank source implementations, and source keys excluded by the `_DHSGC` lattice are deliberately exposed rather than silently repaired.
 
 > **Canonicalized does not mean causally validated.** The canonical panel is a measurement substrate from which experiments can be defined and rerun.
+
+## Canonical experiment measurement preflight
+
+Before an estimator sees the panel, treatment and outcome semantics are resolved through an explicit experiment manifest.
+
+The first preflight is:
+
+```text
+config/preflight_wbad_record_acled_vac.json
+```
+
+Run:
+
+```bash
+python tests_experiment_semantics.py
+
+python -m fcv_harness.experiment_preflight_cli \
+  --canonical-manifest config/canonical_a2_T2_y2001.json \
+  --experiment-manifest config/preflight_wbad_record_acled_vac.json \
+  --base-dir . \
+  --out-dir out/preflight_wbad_record_acled_vac
+```
+
+The current treatment registry intentionally distinguishes:
+
+```text
+wbad.record_present       wbad.amount_positive
+wbkg.record_present       wbkg.amount_positive
+cn.record_present         cn.amount_positive
+```
+
+Treatment resolution produces an explicit nullable `treatment`, `eligible`, `treatment_provenance`, and `treatment_measurement_status`. Rows outside the declared experiment window are not silently recoded as controls.
+
+The outcome contract also requires an explicit absent-record policy. The first ACLED manifest uses:
+
+```text
+absent_record_policy = unresolved
+```
+
+so the expected preflight state is **ESTIMATION BLOCKED**. This is deliberate: ACLED zero-versus-absence semantics must be resolved before complete-case regression can accidentally select on observed conflict records.
+
+The preflight emits:
+
+```text
+experiment_preflight.md
+input_eligibility.csv
+treatment_support_by_period.csv
+source_only_keys.csv
+source_outside_lattice_by_country.csv
+source_outside_lattice_by_period.csv
+measurement_frame_sample.csv
+experiment_contract.json
+```
+
+`E0_INPUT_ELIGIBILITY` reports source/lattice attrition, treated/control support, next-period outcome record/value coverage, and whether the declared measurement policy permits estimation. No coefficient is produced.
+
+Read `EXPERIMENT_PREFLIGHT.md` for the semantic contract and stop rules.
 
 ## Authority boundary
 
@@ -165,7 +227,7 @@ The main project-state concepts remain `planned`, `active`, `completed`, `ambigu
 
 `fcv_harness.panel_cli` is retained as a compatibility/archaeological adapter. It reflects the earlier reconstruction in which treatment amount columns were expected to be present in the panel and then shifted directly into a calibration regression.
 
-The newly recovered source evidence showed that `_DHSGC.csv` is more accurately treated as the dense covariate lattice, while project exposures and outcomes survive as separate `agg_*` surfaces. New real-data work should therefore pass through the canonical checkpoint before the panel experiment API is adapted in the next wave.
+The recovered source evidence showed that `_DHSGC.csv` is more accurately treated as the dense covariate lattice, while project exposures and outcomes survive as separate `agg_*` surfaces. New real-data work should therefore pass through the canonical checkpoint and canonical experiment preflight instead of using source-specific logic inside the legacy estimator adapter.
 
 The existing panel gates and baseline estimator remain useful downstream:
 

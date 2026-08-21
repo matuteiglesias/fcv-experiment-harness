@@ -1,0 +1,23 @@
+{
+  "experiment_id": "preflight_wbad_record_acled_vac_a2_T2_y2001",
+  "panel_id": "a2_T2_y2001",
+  "unit_col": "GID",
+  "period_col": "TimePeriod",
+  "country_col": "country_iso3",
+  "treatment": {
+    "source": "wbad",
+    "definition": "record_present",
+    "annotation_version": "legacy_2023"
+  },
+  "eligibility": {
+    "treatment_period_start": "2003-2004",
+    "treatment_period_end": "2013-2014"
+  },
+  "outcome": {
+    "source": "acled",
+    "column": "acled_deaths_violence_against_civilians",
+    "timing": "next_period",
+    "absent_record_policy": "unresolved"
+  },
+  "covariates": []
+}
