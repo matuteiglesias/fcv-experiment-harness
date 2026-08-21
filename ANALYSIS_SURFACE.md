@@ -9,7 +9,7 @@ It deliberately does not run a coefficient.
 
 ## Current production decision
 
-The repository does not yet contain an independent full-ADM2 GADM/population spine. Therefore E1 does **not** manufacture one from the union of treatment and outcome sources, because doing so would omit pure controls that have neither investment nor violence.
+The repository does not yet contain an independent full-ADM2 GADM/population spine. E1 therefore does **not** manufacture one from the union of treatment and outcome sources, because doing so would omit pure controls that have neither investment nor violence.
 
 The current analysis universe is declared as:
 
@@ -21,6 +21,17 @@ authority  dhsgc_restricted_legacy_2023
 This means the recovered `_DHSGC` lattice is used as a **restricted research universe**, not asserted to be all ADM2 Africa. Every output carries this authority explicitly and source keys outside it remain visible in the attrition diagnostics.
 
 The implementation also supports `external_gid_spine`: once a trustworthy ADM2 GID spine is recovered, it can define the universe while DHSGC becomes an attached covariate surface with `dhsgc_available` rather than an eligibility requirement.
+
+### Country identity
+
+Country identity is derived transparently from the legacy GADM GID rather than guessed from treatment or outcome sources. The recovered archive contains at least two legitimate GADM naming generations:
+
+```text
+AGO.1.1_1   -> AGO
+GHA1.1_2    -> GHA
+```
+
+The first real E1 run exposed 260 Ghana GIDs using the second form. The parser now supports both forms, and `U2_COUNTRY_IDENTITY` is a hard gate: any GID that still cannot be resolved is emitted to `unparsed_country_gids.csv` and blocks later country fixed effects.
 
 ## ACLED measurement decision
 
@@ -69,6 +80,7 @@ python tests_smoke.py
 python tests_canonical.py
 python tests_experiment_semantics.py
 python tests_analysis_surface.py
+python tests_country_identity.py
 
 python -m fcv_harness.analysis_surface_cli \
   --surface-manifest config/analysis_surface_a2_T2_y2001.json \
@@ -86,6 +98,7 @@ analysis_surface_card.md
 analysis_surface_contract.json
 analysis_surface_gates.csv
 analysis_universe_country_profile.csv
+unparsed_country_gids.csv
 
 acled_measurement_audit_overall.csv
 acled_measurement_audit_by_period.csv
@@ -111,12 +124,13 @@ resolved_preflight/
 
 1. `analysis_surface_card.md`
 2. `analysis_surface_gates.csv`
-3. `acled_measurement_audit_overall.csv`
-4. `acled_measurement_audit_by_period.csv`
-5. `analysis_universe_country_profile.csv`
-6. `source_outside_lattice_by_country.csv`
-7. `resolved_preflight/experiment_preflight.md`
-8. `resolved_preflight/treatment_support_by_period.csv`
+3. `unparsed_country_gids.csv`
+4. `acled_measurement_audit_overall.csv`
+5. `acled_measurement_audit_by_period.csv`
+6. `analysis_universe_country_profile.csv`
+7. `source_outside_lattice_by_country.csv`
+8. `resolved_preflight/experiment_preflight.md`
+9. `resolved_preflight/treatment_support_by_period.csv`
 
 Do not begin by inspecting the full resolved panel.
 
@@ -125,6 +139,7 @@ Do not begin by inspecting the full resolved panel.
 ```text
 U0_UNIVERSE_DECLARED
 U1_SOURCE_ATTRITION_QUANTIFIED
+U2_COUNTRY_IDENTITY
 A0_ACLED_POLICY_EXPLICIT
 A1_ACLED_RESOLUTION_COMPLETENESS
 A2_ACLED_STRUCTURAL_ZERO_PROFILE
@@ -135,6 +150,7 @@ Interpretation:
 
 - **U0 GREEN** means the observation universe is explicitly named, not that it is the final ideal geography.
 - **U1 YELLOW** is expected while substantive source keys remain outside the DHSGC-restricted universe.
+- **U2 GREEN** is required before country fixed effects: every analysis-universe GID must have a transparent country identity.
 - **A0 GREEN** means zero-versus-absence semantics are explicit.
 - **A1 RED** is a hard stop: a record-present missing value or unresolved absent record survived inside the declared coverage treatment.
 - **A2 YELLOW** is descriptive: sparse conflict data will generate many structural zeroes and later models must respect that distribution.
@@ -157,6 +173,7 @@ The resolved preflight may report that measurement policy now permits a later es
 Stop before E2 if:
 
 - the universe is not unique at `GID × TimePeriod`;
+- `U2_COUNTRY_IDENTITY` is RED;
 - an ACLED record inside verified coverage has a missing outcome value;
 - unresolved ACLED absence remains inside the verified coverage window;
 - the resolved E0 loses treated/control support;
