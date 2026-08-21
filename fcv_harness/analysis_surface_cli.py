@@ -10,6 +10,7 @@ from .analysis_surface import (
 from .canonical import CanonicalPanelSpec, load_sources
 from .canonical_experiment import (
     CanonicalPanelExperimentSpec,
+    render_experiment_preflight,
     run_experiment_preflight,
     write_experiment_preflight_outputs,
 )
@@ -46,6 +47,45 @@ def _assert_contract_alignment(surface_spec, experiment_path):
         raise ValueError("Resolved experiment verified_geography_scope differs from E1 surface")
     if outcome.get("coverage_basis") != surface_spec.outcome.coverage_basis:
         raise ValueError("Resolved experiment coverage_basis differs from E1 surface")
+
+
+def _align_resolved_preflight_reporting(preflight, experiment_spec):
+    """Keep E0 explanatory text aligned with the explicit outcome policy.
+
+    The generic D-stage E0 table predates E1's resolved ACLED policy and its final
+    outcome-coverage row used unresolved-policy wording. E1 corrects the human-facing
+    note without changing any counts, eligibility, or treatment semantics.
+    """
+    table = preflight["input_eligibility"].copy()
+    metric = "eligible rows with next-period outcome record / value"
+    mask = table["metric"].eq(metric)
+
+    policy = experiment_spec.outcome.absent_record_policy
+    if policy == "zero_within_verified_coverage":
+        note = (
+            "Observed-record count and resolved-value count are reported separately. "
+            "Absent records inside the declared verified coverage window are explicitly "
+            "resolved to zero; rows outside verified coverage remain unavailable."
+        )
+    elif policy == "observed_records_only":
+        note = (
+            "Absent outcome records are explicitly excluded under the "
+            "observed-records-only policy; they are not zero-filled."
+        )
+    else:
+        note = (
+            "Absent outcome records remain unresolved and are not silently converted "
+            "to zero."
+        )
+
+    table.loc[mask, "note"] = note
+    preflight["input_eligibility"] = table
+    preflight["report"] = render_experiment_preflight(
+        experiment_spec,
+        table,
+        preflight["support_by_period"],
+    )
+    return preflight
 
 
 def main():
@@ -85,6 +125,7 @@ def main():
         experiment_spec,
         source_only_keys=result["source_outside"]["source_only_keys"],
     )
+    preflight = _align_resolved_preflight_reporting(preflight, experiment_spec)
     preflight_dir = Path(out) / "resolved_preflight"
     write_experiment_preflight_outputs(
         preflight,
