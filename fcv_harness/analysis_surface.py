@@ -491,11 +491,37 @@ def build_universe_country_profile(
     return pd.DataFrame(rows).sort_values(country_col)
 
 
+def build_unparsed_country_gid_profile(
+    panel: pd.DataFrame,
+    unit_col="GID",
+    country_col="country_iso3",
+):
+    missing = panel[country_col].isna()
+    if not missing.any():
+        return pd.DataFrame(
+            columns=[unit_col, "rows", "periods", "first_period", "last_period"]
+        )
+    rows = []
+    for gid, g in panel.loc[missing].groupby(unit_col, dropna=False):
+        periods = _sorted_periods(g["TimePeriod"])
+        rows.append(
+            {
+                unit_col: gid,
+                "rows": int(len(g)),
+                "periods": int(g["TimePeriod"].nunique()),
+                "first_period": periods[0] if periods else None,
+                "last_period": periods[-1] if periods else None,
+            }
+        )
+    return pd.DataFrame(rows).sort_values(unit_col)
+
+
 def run_analysis_surface_gates(
     surface_spec: AnalysisSurfaceSpec,
     panel: pd.DataFrame,
     source_outside: dict,
     acled_audit: dict,
+    unparsed_country_gids: Optional[pd.DataFrame] = None,
 ):
     rows = []
 
@@ -531,6 +557,19 @@ def run_analysis_surface_gates(
         "substantive source GID-period keys outside declared universe",
         int(len(outside)),
         "These keys remain provenance/selection evidence and are not silently added as controls.",
+    )
+
+    unparsed_n = (
+        int(len(unparsed_country_gids))
+        if unparsed_country_gids is not None
+        else int(panel["country_iso3"].isna().groupby(panel["GID"]).any().sum())
+    )
+    add(
+        "U2_COUNTRY_IDENTITY",
+        "GREEN" if unparsed_n == 0 else "RED",
+        "GIDs without GID-derived country identity",
+        unparsed_n,
+        "Country identity must be resolved before country fixed effects or country-level coverage claims.",
     )
 
     unresolved = int(
@@ -586,6 +625,7 @@ def render_analysis_surface_card(
     gates: pd.DataFrame,
     universe_profile: pd.DataFrame,
     acled_audit: dict,
+    unparsed_country_gids: Optional[pd.DataFrame] = None,
 ):
     overall = acled_audit["acled_measurement_audit_overall"].iloc[0]
     periods = _sorted_periods(panel[surface_spec.period_col])
@@ -601,7 +641,8 @@ def render_analysis_surface_card(
         f"- Universe authority: `{surface_spec.universe.authority}`",
         f"- Rows: `{len(panel):,}`",
         f"- GIDs: `{panel[surface_spec.unit_col].nunique():,}`",
-        f"- Countries: `{panel[surface_spec.country_col].nunique():,}`",
+        f"- Countries with resolved ISO3 identity: `{panel[surface_spec.country_col].nunique():,}`",
+        f"- GIDs with unresolved country identity: `{0 if unparsed_country_gids is None else len(unparsed_country_gids):,}`",
         f"- Periods: `{len(periods)}` ({periods[0] if periods else '?'} to {periods[-1] if periods else '?'})",
         f"- DHSGC-available share: `{panel['dhsgc_available'].mean():.4f}`",
         "",
@@ -677,8 +718,17 @@ def run_analysis_surface_checkpoint(
         unit_col=surface_spec.unit_col,
         country_col=surface_spec.country_col,
     )
+    unparsed_country_gids = build_unparsed_country_gid_profile(
+        panel,
+        unit_col=surface_spec.unit_col,
+        country_col=surface_spec.country_col,
+    )
     gates = run_analysis_surface_gates(
-        surface_spec, panel, source_outside, acled_audit
+        surface_spec,
+        panel,
+        source_outside,
+        acled_audit,
+        unparsed_country_gids=unparsed_country_gids,
     )
     card = render_analysis_surface_card(
         surface_spec,
@@ -687,12 +737,14 @@ def run_analysis_surface_checkpoint(
         gates,
         universe_profile,
         acled_audit,
+        unparsed_country_gids=unparsed_country_gids,
     )
     return {
         "panel": panel,
         "source_outside": source_outside,
         "acled_audit": acled_audit,
         "universe_country_profile": universe_profile,
+        "unparsed_country_gids": unparsed_country_gids,
         "gates": gates,
         "card": card,
     }
@@ -729,6 +781,9 @@ def write_analysis_surface_outputs(
     )
     result["universe_country_profile"].to_csv(
         out / "analysis_universe_country_profile.csv", index=False
+    )
+    result["unparsed_country_gids"].to_csv(
+        out / "unparsed_country_gids.csv", index=False
     )
     result["gates"].to_csv(out / "analysis_surface_gates.csv", index=False)
     for name, table in result["source_outside"].items():
