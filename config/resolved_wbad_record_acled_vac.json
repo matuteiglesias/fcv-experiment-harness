@@ -1,0 +1,27 @@
+{
+  "experiment_id": "resolved_wbad_record_acled_vac_a2_T2_y2001",
+  "panel_id": "a2_T2_y2001",
+  "treatment": {
+    "source": "wbad",
+    "definition": "record_present",
+    "annotation_version": "legacy_2023"
+  },
+  "eligibility": {
+    "treatment_period_start": "2003-2004",
+    "treatment_period_end": "2013-2014"
+  },
+  "outcome": {
+    "source": "acled",
+    "column": "acled_deaths_violence_against_civilians",
+    "timing": "next_period",
+    "absent_record_policy": "zero_within_verified_coverage",
+    "verified_period_start": "1997-1998",
+    "verified_period_end": "2021-2022",
+    "verified_geography_scope": "analysis_universe",
+    "coverage_basis": "legacy_2023_acled_africa_aggregate_zero_fill"
+  },
+  "covariates": [],
+  "unit_col": "GID",
+  "period_col": "TimePeriod",
+  "country_col": "country_iso3"
+}
