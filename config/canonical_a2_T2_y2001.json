@@ -1,0 +1,58 @@
+{
+  "panel_id": "a2_T2_y2001",
+  "geography": {
+    "scheme": "admin",
+    "level": 2
+  },
+  "time": {
+    "period_years": 2,
+    "alignment_year": 2001
+  },
+  "unit_col": "GID",
+  "period_col": "TimePeriod",
+  "annotation_version": "legacy_2023",
+  "sources": {
+    "lattice": {
+      "path": "data/reg_data/africaa2T22001_DHSGC.csv",
+      "kind": "lattice",
+      "grain": ["GID", "TimePeriod"],
+      "prefix": "dhsgc"
+    },
+    "acled": {
+      "path": "data/reg_data/agg_acled_africa_a2_2y_2001",
+      "kind": "outcome",
+      "grain": ["GID", "TimePeriod"],
+      "prefix": "acled"
+    },
+    "afb": {
+      "path": "data/reg_data/agg_afb_places_GID_africa_a2_2y_2001",
+      "kind": "survey",
+      "grain": ["GID", "TimePeriod"],
+      "prefix": "afb"
+    },
+    "wbad": {
+      "path": "data/reg_data/agg_WBad_africa_a2_2y_2001",
+      "kind": "project",
+      "grain": ["GID", "TimePeriod", "jobcat"],
+      "prefix": "wbad",
+      "amount_col": "Amount_USD",
+      "jobcat_col": "jobcat"
+    },
+    "wbkg": {
+      "path": "data/reg_data/agg_WBkg_africa_a2_2y_2001",
+      "kind": "project",
+      "grain": ["GID", "TimePeriod", "jobcat"],
+      "prefix": "wbkg",
+      "amount_col": "Amount_USD",
+      "jobcat_col": "jobcat"
+    },
+    "cn": {
+      "path": "data/reg_data/agg_CN_africa_a2_2y_2001",
+      "kind": "project",
+      "grain": ["GID", "TimePeriod", "jobcat"],
+      "prefix": "cn",
+      "amount_col": "Amount_USD",
+      "jobcat_col": "jobcat"
+    }
+  }
+}

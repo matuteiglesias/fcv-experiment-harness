@@ -1,24 +1,135 @@
 # FCV Experiment Harness v0
 
-A deliberately small experimental harness for the FCV spatial-data research project.
+A deliberately small experimental measurement harness for the FCV spatial-data research project.
 
-The purpose is not to encode the final scientific design. It separates:
+The project separates:
 
-- **A — empirical infrastructure**: observations, projects, exposure links, timing/provenance;
-- **B — experiment specification**: radius, treatment state, outcome, covariates, fixed effects;
-- **C — gates**: checks that say whether a candidate experiment is measurable and interpretable enough to proceed.
+- **A — empirical infrastructure**: observations, projects, source surfaces, geography, timing and provenance;
+- **B — experiment specification**: treatment, counterfactual, timing, outcome, geography, sample and estimator;
+- **C — gates**: checks that say whether the measurement substrate or a candidate experiment is usable enough to proceed.
 
-This v0 is informed by the methodological implementation in Blair, Marty & Roessler and Briggs:
+The governing rule is simple: weak or failed gates are information about the instrument/design, not an invitation to search the specification grid for a better coefficient.
 
-- project status is evaluated at the observation date;
-- `planned`, `active`, `completed`, and `ambiguous` are preserved explicitly;
-- the main baseline contrast is `completed - planned`;
-- exposure radius is an experiment parameter, not a hard-coded fact;
-- project geolocation precision is preserved;
-- effective identifying support is reported, not just raw row count;
-- selection diagnostics, placebo behavior, and synthetic signal recovery are first-class outputs.
+## Current real-data architecture
 
-## Data contract
+The recovered 2023 work contains multiple empirical surfaces that share a `GID × TimePeriod` system. The harness now treats them explicitly as separate inherited objects:
+
+```text
+legacy 2023 processing
+        ↓
+source-specific surfaces
+        ↓
+HARNESS CANONICALIZATION
+        ↓
+canonical GID × TimePeriod panel + panel card
+        ↓
+experiment specification
+        ↓
+experiment gates
+        ↓
+estimator / falsification / sensitivity
+```
+
+The first canonical calibration lane is frozen at:
+
+```text
+geography        GADM ADM2 (`a2`)
+period length    2 years
+alignment        y0 = 2001
+annotations      legacy_2023 jobcat values, unchanged
+```
+
+The source manifest is:
+
+```text
+config/canonical_a2_T2_y2001.json
+```
+
+and expects local/linked files under `data/reg_data/`. The whole `data/` tree remains Git-ignored.
+
+## Canonical panel checkpoint
+
+This is the recommended entry point for real FCV data.
+
+```bash
+python -m pip install -e .
+python tests_smoke.py
+python tests_canonical.py
+
+python -m fcv_harness.canonical_cli \
+  --manifest config/canonical_a2_T2_y2001.json \
+  --base-dir . \
+  --out-dir out/canonical_a2_T2_y2001
+```
+
+The canonicalizer:
+
+- uses `africaa2T22001_DHSGC.csv` as the dense covariate lattice;
+- validates source grains before any collapse;
+- keeps ACLED and Afrobarometer as separate sparse outcome/survey surfaces;
+- keeps WBad, WBkg and China as separate project-source implementations;
+- preserves legacy `jobcat` values exactly as inherited;
+- records project-record presence separately from positive `Amount_USD`;
+- does **not** fill absent ACLED records with zero;
+- does **not** choose treatment/control groups or run a regression.
+
+Generated outputs include:
+
+```text
+canonical_panel_card.md
+canonical_gates.csv
+source_inventory.csv
+key_integrity.csv
+period_coverage.csv
+gid_coverage.csv
+column_inventory.csv
+project_exposure_profile.csv
+wb_source_comparison.csv
+covariate_profile.csv
+merge_audit.json
+canonical_panel_sample.csv
+canonical_panel.csv.gz
+```
+
+Read `CANONICAL_CHECKPOINT.md` for the human inspection guide and expected real-data sanity counts.
+
+## Canonical-data gates
+
+The checkpoint currently reports:
+
+- `C0_LATTICE_INTEGRITY`
+- `C1_SOURCE_KEY_INTEGRITY`
+- `C2_SOURCE_COVERAGE_REPORTED`
+- `C3_LEGACY_EXPOSURE_STRUCTURE`
+- `C4_ACLED_MEASUREMENT_SEMANTICS`
+- `C5_WB_SOURCE_COMPARISON`
+- `C6_COVARIATE_PROFILE`
+
+Some YELLOW gates are expected. In particular, zero-amount project records, sparse ACLED row presence, and differences between the two World Bank source implementations are deliberately exposed rather than silently repaired.
+
+> **Canonicalized does not mean causally validated.** The canonical panel is a measurement substrate from which experiments can be defined and rerun.
+
+## Authority boundary
+
+For the current wave, the harness primarily **inherits and characterizes** the 2023 processing rather than rebuilding it.
+
+Authority may move upstream later when evidence justifies replacing a legacy step. A future source family can therefore evolve from:
+
+```text
+L0  legacy inherited
+L1  harness normalized
+L2  harness derived
+L3  harness rebuilt from upstream/raw data
+L4  research-validated processing choice
+```
+
+The canonical contracts are designed so a better upstream source can eventually replace a legacy surface without rewriting downstream experiments.
+
+## Spatial project-state experiment lane
+
+The original harness lane remains available for project-location designs inspired by Blair, Marty & Roessler and Briggs.
+
+Its data contract is:
 
 ### observations
 Required: `obs_id`, `cluster_id`, `obs_year`, selected outcome.
@@ -31,26 +142,13 @@ Recommended: actual/scheduled start/end year, source status, geolocation precisi
 ### exposure_links
 Required: `obs_id`, `project_id`, `distance_km`.
 
-## Quick start
+Run the synthetic demonstration with:
 
 ```bash
 python examples/synthetic_demo.py
 ```
 
-Produces:
-- `examples/demo_gate_report.md`
-- `examples/demo_bandwidth.csv`
-
-## Intentionally deferred
-- final jobs/non-jobs annotation;
-- canonical WB/China ingestion;
-- project amount allocation over multiple locations;
-- modern staggered-adoption/event-study estimators;
-- spatial-spillover estimators;
-- final ACLED count model.
-
-
-## Run on canonical CSVs
+or the CSV CLI with:
 
 ```bash
 python -m fcv_harness.cli \
@@ -61,64 +159,17 @@ python -m fcv_harness.cli \
   --out-dir run_output
 ```
 
-The run emits:
+The main project-state concepts remain `planned`, `active`, `completed`, `ambiguous`, and `never`; radius, geolocation precision, effective identifying support, selection diagnostics, placebo behavior and synthetic signal recovery are first-class experiment properties.
 
-- `analysis_sample.csv`
-- `baseline_estimate.csv`
-- `bandwidth_sweep.csv`
-- `gate_report.md`
+## Legacy area-period experiment adapter
 
-This is the intended interface for connecting the recovered FCV data without moving production logic back into notebooks.
+`fcv_harness.panel_cli` is retained as a compatibility/archaeological adapter. It reflects the earlier reconstruction in which treatment amount columns were expected to be present in the panel and then shifted directly into a calibration regression.
 
+The newly recovered source evidence showed that `_DHSGC.csv` is more accurately treated as the dense covariate lattice, while project exposures and outcomes survive as separate `agg_*` surfaces. New real-data work should therefore pass through the canonical checkpoint before the panel experiment API is adapted in the next wave.
 
-## Recovered FCV area-period panel lane
+The existing panel gates and baseline estimator remain useful downstream:
 
-The 2023 FCV preprocessing pipeline already created `GID × TimePeriod` CSVs for
-`T = 2, 3, 4` and `y0 = 2000, 2001`. The panel lane deliberately consumes those outputs
-instead of rebuilding the historical notebooks first.
-
-Treatment definitions reconstructed from the old matching code:
-
-- `cnwb_pooled`: `wbad_amount_usd + cn_amount_usd > 0`
-- `wb_only`: World Bank amount > 0 and China amount == 0
-- `cn_only`: China amount > 0 and World Bank amount == 0
-
-The v0 temporal contract is explicit:
-
-```text
-treatment in period t
-        ↓
-outcome in period t+1
-```
-
-with `outcome(t-1)` retained for balance/placebo checks.
-
-Run:
-
-```bash
-python -m fcv_harness.panel_cli \
-  --panel "data/reg_data/africaa2T22001_DHSGC.csv" \
-  --config config/legacy_panel_example.json \
-  --out-dir out/legacy_adm2_T2_y2001
-```
-
-Before running a real outcome, replace `REPLACE_WITH_VIOLENCE_OUTCOME_COLUMN` in the config
-after inspecting `column_profile.csv` or the source schema. The harness intentionally refuses
-to guess which historical violence column is the scientific outcome.
-
-Panel outputs:
-
-- `column_profile.csv`
-- `analysis_frame.csv`
-- `support_by_period.csv`
-- `gates.csv`
-- `gate_report.md`
-- `baseline_estimate.csv`
-
-Panel gates:
-
-- panel uniqueness/integrity;
-- post-outcome coverage after t→t+1 shift;
+- post-outcome coverage after a declared `t → t+1` shift;
 - treated/control support;
 - within-period support;
 - outcome sparsity;
@@ -126,62 +177,18 @@ Panel gates:
 - prior-outcome placebo;
 - synthetic signal recovery.
 
-The baseline panel OLS is a calibration estimator only. A mature staggered-adoption/event-study
-lane should use an estimator designed for heterogeneous treatment timing rather than naïve TWFE.
+The baseline OLS is calibration only, not the final staggered-treatment estimator.
 
+## Intentionally deferred
 
-## Scan the whole legacy experiment grid first
+- revising the legacy 2023 jobs/non-jobs annotation;
+- deciding whether project-record presence or positive amount is the preferred exposure definition;
+- reconciling WBad versus WBkg into a preferred World Bank source;
+- declaring absent ACLED rows to be structural zeroes;
+- canonical period-varying population processing;
+- modern staggered-adoption/event-study estimators;
+- spatial-spillover estimators;
+- final ACLED count/hurdle model;
+- respondent-level Afrobarometer reconstruction.
 
-Before selecting an ADM/T/y0 specification, scan the recovered CSV grid:
-
-```bash
-python -m fcv_harness.grid_scan \
-  --glob "data/reg_data/*_DHSGC.csv" \
-  --out out/grid_viability.csv \
-  --treatment-type cnwb_pooled
-```
-
-If the violence outcome column is already known:
-
-```bash
-python -m fcv_harness.grid_scan \
-  --glob "data/reg_data/*_DHSGC.csv" \
-  --out out/grid_viability.csv \
-  --treatment-type cnwb_pooled \
-  --outcome YOUR_OUTCOME_COLUMN
-```
-
-The scanner reports, per file:
-
-- admin level, T, y0 parsed from filename;
-- rows, units, periods and duplicate unit-periods;
-- treated/control counts for pooled/WB-only/CN-only;
-- periods with genuine treated/control overlap;
-- minimum treated/control support inside usable periods;
-- explicit outcome missingness/sparsity when supplied;
-- candidate violence-like numeric columns for inspection;
-- a rough viability score used only for ranking where to look first.
-
-The ranking score is not a statistical result. It is a cheap way to avoid spending research time
-on configurations that have no empirical support.
-
-
-## Legacy outcomes are a separate table
-
-The recovered regression prototype did **not** assume that `*_DHSGC.csv` already contained the outcome.
-Use `--outcomes` to attach the corresponding outcome surface by strict `GID × TimePeriod` keys.
-
-The first grounded legacy calibration config is:
-
-```text
-config/legacy_hello_world_acled_vac.json
-```
-
-with:
-
-- outcome: `acled_deaths_violence_against_civilians`
-- treatment: `cnwb_pooled`
-- first explicit covariate: `popsum`
-
-This recovers the old project's empirical vocabulary without treating it as the final scientific design.
-The CLI writes `outcome_merge_audit.json` and adds `P0_OUTCOME_MERGE_COVERAGE` before the other panel gates.
+These are scientific decisions, not cleanup tasks. They should be changed through explicit source/treatment versions so the same gates can be rerun after each improvement.
