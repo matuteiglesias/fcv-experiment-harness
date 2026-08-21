@@ -9,9 +9,19 @@ from .canonical import CanonicalPanelSpec, _lattice_name
 
 
 def derive_country_iso3(values: pd.Series) -> pd.Series:
-    """Derive ISO3-like country code from GADM-style GIDs such as AGO.1.1_1."""
+    """Derive ISO3-like country code from recovered GADM-style GIDs.
+
+    The legacy archive contains at least two GADM naming forms:
+
+    - dotted country separator, e.g. ``AGO.1.1_1``;
+    - GADM-v2-style direct level suffix, e.g. ``GHA1.1_2``.
+
+    Only the leading three letters are accepted, and they must be followed by a
+    dot, a digit (the first administrative level), or end-of-string. This avoids
+    treating arbitrary longer alphabetic labels as country codes.
+    """
     s = values.astype("string")
-    out = s.str.extract(r"^([A-Za-z]{3})(?:\.|$)", expand=False)
+    out = s.str.extract(r"^([A-Za-z]{3})(?=\.|\d|$)", expand=False)
     return out.str.upper()
 
 
