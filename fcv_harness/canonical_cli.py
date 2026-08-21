@@ -6,6 +6,10 @@ from .canonical import (
     run_canonical_checkpoint,
     write_checkpoint_outputs,
 )
+from .lattice_diagnostics import (
+    build_source_outside_lattice_diagnostics,
+    write_source_outside_lattice_diagnostics,
+)
 
 
 def main():
@@ -28,8 +32,15 @@ def main():
     result = run_canonical_checkpoint(spec, base_dir=args.base_dir)
     out = write_checkpoint_outputs(result, args.out_dir)
 
+    diagnostics = build_source_outside_lattice_diagnostics(spec, result["loaded"])
+    write_source_outside_lattice_diagnostics(diagnostics, out)
+
     print(result["card"])
     print(f"\nCanonical checkpoint written to {Path(out).resolve()}")
+    print(
+        "Additional lattice-selection diagnostics: source_only_keys.csv, "
+        "source_outside_lattice_by_country.csv, source_outside_lattice_by_period.csv"
+    )
     print("No treatment effect or regression estimate was produced by this command.")
 
 
