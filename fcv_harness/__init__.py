@@ -42,3 +42,16 @@ from .analysis_surface import (
     run_analysis_surface_checkpoint,
     write_analysis_surface_outputs,
 )
+from .calibration import (
+    CalibrationCellSpec,
+    CalibrationThresholds,
+    CalibrationMatrixSpec,
+    build_cell_experiment_spec,
+    attach_pre_outcome,
+    placebo_estimate,
+    synthetic_signal_recovery,
+    run_calibration_gates,
+    run_calibration_cell,
+    run_calibration_matrix,
+    write_calibration_outputs,
+)
