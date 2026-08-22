@@ -85,7 +85,7 @@ jobs:
           cat out-ci/e2/cells/wbad_amount_positive/support_by_period.csv
 
       - name: Upload E1 acceptance artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e1-analysis-surface-checkpoint
           path: |
@@ -102,7 +102,7 @@ jobs:
             out-ci/e1/resolved_preflight/treatment_support_by_period.csv
 
       - name: Upload E2 calibration artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2-wb-acled-calibration
           path: |
