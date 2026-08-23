@@ -25,10 +25,10 @@ from fcv_harness.calibration import (
     CalibrationCellSpec,
     CalibrationMatrixSpec,
     CalibrationThresholds,
-    run_calibration_matrix,
 )
 from fcv_harness.canonical import CanonicalPanelSpec
 from fcv_harness.canonical_experiment import EligibilitySpec, TreatmentMeasurementSpec
+from fcv_harness.contracted_calibration import run_contracted_calibration_matrix
 from fcv_harness.contracted_experiment import (
     ContractedPanelExperimentSpec,
     run_contracted_experiment_preflight,
@@ -63,7 +63,6 @@ with tempfile.TemporaryDirectory() as td:
     period_scheme = PeriodScheme(width_years=2, anchor_year=2001)
     periods = ["2001-2002", "2003-2004", "2005-2006", "2007-2008"]
 
-    gids = []
     linkage_rows = []
     lattice_rows = []
     wbad_rows = []
@@ -74,7 +73,6 @@ with tempfile.TemporaryDirectory() as td:
         country = "AGO" if i < 12 else "KEN"
         gid = f"{country}.{i + 1}.1_1"
         geo_uid = f"gadm:4.1:adm2:{gid}"
-        gids.append(gid)
         linkage_rows.append({"GID": gid, "geo_uid": geo_uid})
         if i % 12 < 6:
             treated_units.add(gid)
@@ -97,8 +95,8 @@ with tempfile.TemporaryDirectory() as td:
                     }
                 )
 
-            # Omit a subset of VAC rows. The coverage contract below licenses these
-            # specific sparse absences as structural zeros inside its temporal support.
+            # Omit a subset of rows. This synthetic coverage contract explicitly
+            # licenses those sparse absences as structural zeros within 2001-2008.
             if (i + j) % 7 != 0:
                 gold_rows.append(
                     {
@@ -150,7 +148,7 @@ with tempfile.TemporaryDirectory() as td:
     canonical_path.write_text(json.dumps(canonical_payload), encoding="utf-8")
     canonical_spec = CanonicalPanelSpec.from_json(canonical_path)
 
-    data_path = root / "acled_gold.csv"
+    data_path = root / "contracted_gold.csv"
     pd.DataFrame(gold_rows).to_csv(data_path, index=False)
     source_dataset = DatasetRef(
         dataset_id="violence.acled.events",
@@ -184,7 +182,7 @@ with tempfile.TemporaryDirectory() as td:
     )
     measurement = MeasurementContract(
         measure_id="acled.native_event.area_period",
-        description="synthetic contracted ACLED native-event measurement",
+        description="synthetic contracted native-event measurement",
         source_dataset=source_dataset,
         output_grain=gold_grain,
         coverage=coverage,
@@ -192,7 +190,7 @@ with tempfile.TemporaryDirectory() as td:
         period_scheme=period_scheme,
     )
     manifest = RunManifest(
-        run_id="synthetic-acled-measurement",
+        run_id="synthetic-measurement",
         package="fcv-empirical-data",
         package_version="0.1.0",
         started_at=datetime(2026, 8, 23, tzinfo=timezone.utc),
@@ -281,7 +279,9 @@ with tempfile.TemporaryDirectory() as td:
     )
     assert preflight["estimation_permitted"]
     assert preflight["projection"].report.timing_offset == 1
-    assert preflight["frame"].loc[preflight["frame"]["eligible"], "outcome_value"].notna().all()
+    assert preflight["frame"].loc[
+        preflight["frame"]["eligible"], "outcome_value"
+    ].notna().all()
 
     matrix = CalibrationMatrixSpec(
         matrix_id="contracted-demo-e2",
@@ -314,7 +314,7 @@ with tempfile.TemporaryDirectory() as td:
             seed=20260823,
         ),
     )
-    e2 = run_calibration_matrix(
+    e2 = run_contracted_calibration_matrix(
         surface["panel"],
         matrix,
         surface_spec,

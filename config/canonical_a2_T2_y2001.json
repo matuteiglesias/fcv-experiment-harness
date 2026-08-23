@@ -18,12 +18,6 @@
       "grain": ["GID", "TimePeriod"],
       "prefix": "dhsgc"
     },
-    "acled": {
-      "path": "data/reg_data/agg_acled_africa_a2_2y_2001",
-      "kind": "outcome",
-      "grain": ["GID", "TimePeriod"],
-      "prefix": "acled"
-    },
     "afb": {
       "path": "data/reg_data/agg_afb_places_GID_africa_a2_2y_2001",
       "kind": "survey",

@@ -1,5 +1,5 @@
 {
-  "surface_id": "analysis_a2_T2_y2001_acled_vac_v1",
+  "surface_id": "analysis_a2_T2_y2001_contracted_acled_vac_v1",
   "canonical_manifest": "config/canonical_a2_T2_y2001.json",
   "unit_col": "GID",
   "period_col": "TimePeriod",
@@ -8,13 +8,25 @@
     "mode": "canonical_lattice",
     "authority": "dhsgc_restricted_legacy_2023"
   },
-  "outcome": {
-    "source": "acled",
-    "column": "acled_deaths_violence_against_civilians",
-    "policy": "zero_within_verified_coverage",
-    "verified_period_start": "1997-1998",
-    "verified_period_end": "2021-2022",
-    "verified_geography_scope": "analysis_universe",
-    "coverage_basis": "legacy_2023_acled_africa_aggregate_zero_fill"
+  "geography": {
+    "provider": "gadm",
+    "version": "4.1",
+    "scheme": "admin",
+    "level": "2"
+  },
+  "period_scheme": {
+    "width_years": 2,
+    "anchor_year": 2001,
+    "calendar": "gregorian_year"
+  },
+  "measurement": {
+    "measure_id": "acled.native_event.area_period",
+    "selectors": {
+      "native_event_type": "Violence against civilians"
+    },
+    "value_column": "fatalities",
+    "role": "analysis_surface",
+    "timing_offset": 0,
+    "output_column": "vac_fatalities"
   }
 }
