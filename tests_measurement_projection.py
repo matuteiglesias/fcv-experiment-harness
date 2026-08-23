@@ -169,7 +169,7 @@ assert ago["projection_status"] == "observed"
 assert ago["measurement_period_id"] == "2005-2006"
 assert pd.isna(ken["vac_fatalities"])
 assert ken["projection_status"] == "unresolved"
-assert ken["projection_detail"] == "absent_row_unknown"
+assert ken["projection_detail"] == "coverage_temporal_unknown"
 assert result.report.input_row_count == 3
 assert result.report.selected_row_count == 2
 assert result.report.selector_row_counts["native_event_type=Violence against civilians"] == 2

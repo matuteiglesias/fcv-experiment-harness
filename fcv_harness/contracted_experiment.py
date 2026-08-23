@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 import pandas as pd
+from empirical_contracts import GeographySpec, PeriodScheme
 
 from .canonical import _period_start
 from .canonical_experiment import (
@@ -21,7 +22,6 @@ from .measurement_projection import (
     project_empirical_measurement,
     write_projection_report,
 )
-from empirical_contracts import GeographySpec, PeriodScheme
 
 
 @dataclass(frozen=True)
@@ -247,6 +247,12 @@ def build_contracted_treatment_support_by_period(
     return pd.DataFrame(rows).sort_values(spec.period_col) if rows else pd.DataFrame()
 
 
+def _render_table(frame: pd.DataFrame, *, empty: str) -> str:
+    if frame.empty:
+        return empty
+    return "```text\n" + frame.to_string(index=False) + "\n```"
+
+
 def render_contracted_experiment_preflight(
     spec: ContractedPanelExperimentSpec,
     input_eligibility: pd.DataFrame,
@@ -273,11 +279,11 @@ def render_contracted_experiment_preflight(
         "",
         "## Input eligibility",
         "",
-        input_eligibility.to_markdown(index=False),
+        _render_table(input_eligibility, empty="No input-eligibility rows."),
         "",
         "## Support by treatment period",
         "",
-        support_by_period.to_markdown(index=False) if len(support_by_period) else "No eligible rows.",
+        _render_table(support_by_period, empty="No eligible rows."),
         "",
         "Unknown or outside-support empirical rows remain present with missing values and explicit statuses. They are never silently dropped or converted to zero.",
         "",
