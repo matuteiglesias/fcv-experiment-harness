@@ -9,6 +9,7 @@ description = "Experimental measurement harness for FCV spatial-data research"
 requires-python = ">=3.10"
 dependencies = [
   "empirical-data-contracts>=0.1,<0.2",
+  "spatial-data-foundation @ git+https://github.com/matuteiglesias/spatial-data-foundation.git@49b593293176aa53ea4c218442aa5cdabf4a1489",
   "numpy>=1.24",
   "pandas>=2.0",
   "pyarrow>=15,<23",
