@@ -128,5 +128,13 @@ from .calibration_lab import (
     render_instrument_health_report,
     run_calibration_benchmark,
     run_calibration_suite,
-    write_calibration_suite_outputs,
+    write_calibration_suite_outputs)
+from .observability import (
+    derive_repetition_seed,
+    inject_known_effect,
+    run_e2_observability,
+    run_observability_grid,
+    summarize_observability,
+    wild_cluster_signs,
+    write_observability_outputs,
 )
