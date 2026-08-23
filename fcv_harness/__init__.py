@@ -110,3 +110,23 @@ from .fully_contracted_calibration import (
     run_fully_contracted_calibration_matrix,
     write_fully_contracted_calibration_outputs,
 )
+from .calibration_lab import (
+    CalibrationAdapter,
+    CalibrationBenchmarkKind,
+    CalibrationBenchmarkSpec,
+    CalibrationContext,
+    CalibrationEmpiricalInputSpec,
+    CalibrationObservation,
+    CalibrationResult,
+    CalibrationRun,
+    CalibrationRunManifest,
+    CalibrationStatus,
+    CalibrationSuiteResult,
+    RecoveryLevel,
+    RecoveryProfile,
+    RecoveryState,
+    render_instrument_health_report,
+    run_calibration_benchmark,
+    run_calibration_suite,
+    write_calibration_suite_outputs,
+)
