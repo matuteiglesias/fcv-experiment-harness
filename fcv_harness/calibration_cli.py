@@ -1,21 +1,39 @@
 from __future__ import annotations
 
-from pathlib import Path
 import argparse
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
-from .analysis_surface import AnalysisSurfaceSpec, run_analysis_surface_checkpoint
-from .calibration import CalibrationMatrixSpec, run_calibration_matrix, write_calibration_outputs
-from .canonical import CanonicalPanelSpec, load_sources, _period_start
+from .calibration import CalibrationMatrixSpec
+from .canonical import CanonicalPanelSpec, _period_start, load_sources
+from .contracted_calibration import (
+    run_contracted_calibration_matrix,
+    write_contracted_calibration_outputs,
+)
+from .contracted_surface import (
+    ContractedAnalysisSurfaceSpec,
+    run_contracted_analysis_surface_checkpoint,
+)
+from .empirical_input import load_empirical_measurement
 
 
-def _resolve(base_dir, path):
-    p = Path(path)
-    return p if p.is_absolute() else Path(base_dir) / p
+def _resolve(base_dir: str | Path, path: str | Path) -> Path:
+    value = Path(path)
+    return value if value.is_absolute() else Path(base_dir) / value
 
 
-def _augment_stability(result):
+def _load_linkage(path: Path) -> pd.DataFrame:
+    suffix = path.suffix.lower()
+    if suffix == ".csv":
+        return pd.read_csv(path)
+    if suffix in {".parquet", ".pq"}:
+        return pd.read_parquet(path)
+    raise ValueError("geography linkage must be CSV or Parquet")
+
+
+def _augment_stability(result: dict) -> dict:
     stability = result["stability"].copy()
     outcome_sd = {}
     for cell_id, cell_result in result["cells"].items():
@@ -32,12 +50,14 @@ def _augment_stability(result):
     stability["ci95_low"] = stability["effect"] - 1.96 * stability["se"]
     stability["ci95_high"] = stability["effect"] + 1.96 * stability["se"]
     stability["mde80_raw_approx"] = 2.80 * stability["se"]
-    stability["mde80_sd_approx"] = stability["mde80_raw_approx"] / stability["outcome_sd"]
+    stability["mde80_sd_approx"] = (
+        stability["mde80_raw_approx"] / stability["outcome_sd"]
+    )
     result["stability"] = stability
     return result
 
 
-def _agreement_row(df, definition, period_label):
+def _agreement_row(df: pd.DataFrame, definition: str, period_label: str) -> dict:
     a = df[f"wbad_{definition}"].astype("boolean").fillna(False).astype(bool)
     b = df[f"wbkg_{definition}"].astype("boolean").fillna(False).astype(bool)
     both = int((a & b).sum())
@@ -59,47 +79,65 @@ def _agreement_row(df, definition, period_label):
     }
 
 
-def _build_wb_measurement_agreement(panel, matrix_spec):
+def _build_wb_measurement_agreement(
+    panel: pd.DataFrame,
+    matrix_spec: CalibrationMatrixSpec,
+) -> pd.DataFrame:
     years = panel[matrix_spec.period_col].astype(str).map(_period_start)
     mask = years.between(
         _period_start(matrix_spec.treatment_period_start),
         _period_start(matrix_spec.treatment_period_end),
         inclusive="both",
     )
-    p = panel.loc[mask].copy()
+    subset = panel.loc[mask].copy()
     rows = []
     for definition in ["record_present", "amount_positive"]:
-        rows.append(_agreement_row(p, definition, "OVERALL"))
-        for period, g in p.groupby(matrix_spec.period_col, sort=False):
-            rows.append(_agreement_row(g, definition, str(period)))
+        rows.append(_agreement_row(subset, definition, "OVERALL"))
+        for period, group in subset.groupby(matrix_spec.period_col, sort=False):
+            rows.append(_agreement_row(group, definition, str(period)))
     return pd.DataFrame(rows)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Run the predeclared WB→ACLED measurement calibration matrix on the "
-            "resolved E1 analysis surface. Gates run before each real coefficient."
+            "Run the predeclared WB calibration matrix using a contract-backed "
+            "empirical outcome projection. Existing estimator and calibration "
+            "semantics are unchanged."
         )
     )
     parser.add_argument("--matrix-manifest", required=True)
+    parser.add_argument("--empirical-data", required=True)
+    parser.add_argument("--measurement-contract", required=True)
+    parser.add_argument("--coverage-contract", required=True)
+    parser.add_argument("--run-manifest", required=True)
+    parser.add_argument("--geography-linkage", required=True)
     parser.add_argument("--base-dir", default=".")
     parser.add_argument("--out-dir", required=True)
     args = parser.parse_args()
 
     matrix_path = _resolve(args.base_dir, args.matrix_manifest)
     matrix_spec = CalibrationMatrixSpec.from_json(matrix_path)
-
     surface_path = _resolve(args.base_dir, matrix_spec.surface_manifest)
-    surface_spec = AnalysisSurfaceSpec.from_json(surface_path)
+    surface_spec = ContractedAnalysisSurfaceSpec.from_json(surface_path)
     canonical_path = _resolve(args.base_dir, surface_spec.canonical_manifest)
     canonical_spec = CanonicalPanelSpec.from_json(canonical_path)
     loaded = load_sources(canonical_spec, base_dir=args.base_dir)
 
-    surface = run_analysis_surface_checkpoint(
+    bundle = load_empirical_measurement(
+        data_path=_resolve(args.base_dir, args.empirical_data),
+        measurement_contract_path=_resolve(args.base_dir, args.measurement_contract),
+        coverage_contract_path=_resolve(args.base_dir, args.coverage_contract),
+        run_manifest_path=_resolve(args.base_dir, args.run_manifest),
+    )
+    linkage = _load_linkage(_resolve(args.base_dir, args.geography_linkage))
+
+    surface = run_contracted_analysis_surface_checkpoint(
         surface_spec,
         canonical_spec,
         loaded,
+        bundle=bundle,
+        geography_linkage=linkage,
         base_dir=args.base_dir,
     )
     hard_surface_red = surface["gates"].loc[
@@ -107,29 +145,31 @@ def main():
             [
                 "U0_UNIVERSE_DECLARED",
                 "U2_COUNTRY_IDENTITY",
-                "A0_ACLED_POLICY_EXPLICIT",
-                "A1_ACLED_RESOLUTION_COMPLETENESS",
+                "M0_CONTRACTED_MEASUREMENT_IDENTITY",
+                "M1_PROJECTION_ACCOUNTING",
             ]
         )
         & surface["gates"]["status"].eq("RED")
     ]
     if len(hard_surface_red):
         raise RuntimeError(
-            "E2 blocked by hard E1 surface gate(s): "
+            "E2 blocked by hard contracted E1 surface gate(s): "
             + ", ".join(hard_surface_red["gate"].tolist())
         )
 
-    result = run_calibration_matrix(
+    result = run_contracted_calibration_matrix(
         surface["panel"],
         matrix_spec,
         surface_spec,
         surface["gates"],
         surface["source_outside"]["source_only_keys"],
         canonical_spec.panel_id,
+        bundle=bundle,
+        geography_linkage=linkage,
     )
     result = _augment_stability(result)
     agreement = _build_wb_measurement_agreement(surface["panel"], matrix_spec)
-    out = write_calibration_outputs(result, matrix_spec, args.out_dir)
+    out = write_contracted_calibration_outputs(result, matrix_spec, args.out_dir)
     agreement.to_csv(Path(out) / "wb_measurement_agreement.csv", index=False)
 
     print(result["card"])

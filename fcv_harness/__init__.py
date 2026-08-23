@@ -63,3 +63,30 @@ from .empirical_input import (
     require_same_geography,
     require_same_period_scheme,
 )
+from .measurement_projection import (
+    ExperimentProjectionReport,
+    MeasurementProjectionError,
+    MeasurementProjectionSpec,
+    ProjectionResult,
+    project_empirical_measurement,
+    write_projection_report,
+)
+from .contracted_surface import (
+    ContractedAnalysisSurfaceSpec,
+    attach_contracted_measurement,
+    build_projection_audit,
+    run_contracted_analysis_surface_checkpoint,
+    write_contracted_analysis_surface_outputs,
+)
+from .contracted_experiment import (
+    ContractedPanelExperimentSpec,
+    prepare_contracted_experiment_frame,
+    run_contracted_experiment_preflight,
+    write_contracted_experiment_preflight_outputs,
+)
+from .contracted_calibration import (
+    build_contracted_cell_experiment_spec,
+    run_contracted_calibration_cell,
+    run_contracted_calibration_matrix,
+    write_contracted_calibration_outputs,
+)
