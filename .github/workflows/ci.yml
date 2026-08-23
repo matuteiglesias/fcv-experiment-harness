@@ -55,6 +55,8 @@ jobs:
           python tests_empirical_input.py
           python tests_measurement_projection.py
           python tests_contracted_acled_e1_e2.py
+          python tests_fully_contracted_investment.py
+          python tests_fully_contracted_calibration.py
 
       - name: Verify active configs do not name the legacy ACLED aggregate
         run: |
@@ -65,7 +67,14 @@ jobs:
 
       - name: Verify active projection code does not reconstruct raw ACLED fields
         run: |
-          if grep -E "FATALITIES|EVENT_TYPE|GEO_PRECISION" fcv_harness/measurement_projection.py fcv_harness/contracted_surface.py fcv_harness/contracted_experiment.py fcv_harness/contracted_calibration.py; then
+          if grep -E "FATALITIES|EVENT_TYPE|GEO_PRECISION" fcv_harness/measurement_projection.py fcv_harness/contracted_surface.py fcv_harness/contracted_experiment.py fcv_harness/contracted_calibration.py fcv_harness/fully_contracted_experiment.py fcv_harness/fully_contracted_calibration.py; then
             echo "active contracted projection code contains raw ACLED ingestion field names" >&2
+            exit 1
+          fi
+
+      - name: Verify fully contracted investment path has no legacy treatment semantics
+        run: |
+          if grep -E "jobcat|cn_record_present|cn_amount_positive|wbad_record_present|wbkg_record_present|legacy_2023" fcv_harness/fully_contracted_experiment.py fcv_harness/fully_contracted_calibration.py; then
+            echo "fully contracted investment path contains legacy project-treatment semantics" >&2
             exit 1
           fi
