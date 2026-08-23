@@ -54,6 +54,7 @@ jobs:
           python tests_smoke.py
           python tests_canonical.py
           python tests_experiment_semantics.py
+          python tests_empirical_input.py
           python tests_analysis_surface.py
           python tests_country_identity.py
           python tests_calibration.py
