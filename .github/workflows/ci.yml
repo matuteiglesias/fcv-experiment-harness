@@ -57,6 +57,8 @@ jobs:
           python tests_contracted_acled_e1_e2.py
           python tests_fully_contracted_investment.py
           python tests_fully_contracted_calibration.py
+          python tests_calibration_lab.py
+          python tests_observability.py
 
       - name: Verify active configs do not name the legacy ACLED aggregate
         run: |
