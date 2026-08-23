@@ -6,7 +6,12 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from fcv_harness.fully_contracted_calibration import FullyContractedCalibrationSpec
+from fcv_harness.calibration import CalibrationThresholds
+from fcv_harness.fully_contracted_calibration import (
+    FullyContractedCalibrationSpec,
+    FullyContractedTreatmentCellSpec,
+    run_fully_contracted_calibration_matrix,
+)
 from fcv_harness.observability import (
     derive_repetition_seed,
     inject_known_effect,
@@ -14,6 +19,7 @@ from fcv_harness.observability import (
     wild_cluster_signs,
     write_observability_outputs,
 )
+from tests_fully_contracted_calibration import GEO, PERIOD, _experiment, _fixture
 
 
 class ObservabilityTests(unittest.TestCase):
@@ -135,6 +141,52 @@ class ObservabilityTests(unittest.TestCase):
             root_seed=9,
         )
         assert_frame_equal(frame, before, check_exact=True)
+
+    def test_reference_configuration_reuses_existing_investment_acled_projection_frame(self):
+        panel, linkage, treatment_bundle, outcome_bundle = _fixture()
+        calibration = FullyContractedCalibrationSpec(
+            calibration_id="geogcdf-acled-e2-observability",
+            thresholds=CalibrationThresholds(
+                min_treated=10,
+                min_control=10,
+                min_mixed_periods=2,
+                signal_draws=2,
+            ),
+        )
+        calibration_result = run_fully_contracted_calibration_matrix(
+            panel,
+            _experiment(),
+            calibration,
+            (
+                FullyContractedTreatmentCellSpec(
+                    cell_id="record_present",
+                    role="PRIMARY",
+                    value_column="project_count",
+                ),
+            ),
+            treatment_bundle=treatment_bundle,
+            outcome_bundle=outcome_bundle,
+            target_geography=GEO,
+            target_period_scheme=PERIOD,
+            geography_linkage=linkage,
+        )
+        cell = calibration_result["cells"]["record_present"]
+        projected = cell["frame"]
+        before = projected.copy(deep=True)
+        observability = run_e2_observability(
+            projected,
+            calibration,
+            effect_sizes_sd=[0.0, 0.20],
+            repetitions=2,
+            root_seed=20260823,
+        )
+
+        self.assertEqual(len(observability["repetition_results"]), 4)
+        self.assertEqual(int(observability["repetition_results"]["sample_size"].iloc[0]), 120)
+        self.assertTrue(cell["treatment_projection"].report.measure_id.startswith("aiddata.geogcdf"))
+        self.assertTrue(cell["outcome_post_projection"].report.measure_id.startswith("acled"))
+        self.assertEqual(cell["outcome_pre_projection"].report.timing_offset, -1)
+        assert_frame_equal(projected, before, check_exact=True)
 
     def test_output_writer_emits_only_durable_summary_tables(self):
         frame = self.frame()
