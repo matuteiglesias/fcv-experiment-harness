@@ -1,0 +1,14 @@
+{
+  "schema": "current_e2_influence_stability.v1",
+  "suite_id": "current_e2_influence_v1",
+  "purpose": "calibration",
+  "reference_id": "current_geogcdf_acled_e2_v1",
+  "primary_cell_id": "record_present",
+  "required_analysis_identity_sha256": "8d30161872363d6e43af6334d258b351acf68cadab38d73923a0781eb42f513a",
+  "required_primary_frame_sha256": "e82f273a61a91d5dbc772b775d1b0b2107b0b5c9e3c637f8b9cfadd8078b737f",
+  "country_leave_one_out": true,
+  "period_leave_one_out": true,
+  "adm2_screening_method": "cluster_score_linearization",
+  "top_adm2_exact_refits": 20,
+  "note": "Characterizes concentration and fragility of the unchanged canonical OLS point estimate. Omissions are diagnostics only and cannot replace the canonical specification."
+}
