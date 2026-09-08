@@ -23,6 +23,11 @@ from .current_e2_scope import (
     run_scoped_current_e2_reference,
     write_scoped_current_e2_reference_outputs,
 )
+from .current_e2_sparse_outcomes import (
+    CurrentE2SparseOutcomeSpec,
+    run_current_e2_sparse_outcomes,
+    write_current_e2_sparse_outcome_outputs,
+)
 from .reference_identity import (
     CurrentE2ReferenceLock,
     build_current_e2_reference_identity,
@@ -105,6 +110,19 @@ def parser() -> argparse.ArgumentParser:
         default="config/current_e2_falsification_battery.json",
         help="Frozen R4 falsification suite declaration.",
     )
+    ap.add_argument(
+        "--sparse-outcome-family",
+        action="store_true",
+        help=(
+            "Run the frozen R5 outcome-representation family: canonical OLS fatalities, "
+            "OLS VAC event count, LPM any VAC, and PPML VAC event count. Requires --reference-lock."
+        ),
+    )
+    ap.add_argument(
+        "--sparse-outcome-config",
+        default="config/current_e2_sparse_outcome_family.json",
+        help="Frozen R5 sparse-outcome suite declaration.",
+    )
     return ap
 
 
@@ -116,6 +134,8 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("--influence-stability requires --reference-lock")
     if args.falsification_battery and not args.reference_lock:
         raise ValueError("--falsification-battery requires --reference-lock")
+    if args.sparse_outcome_family and not args.reference_lock:
+        raise ValueError("--sparse-outcome-family requires --reference-lock")
 
     spec = CurrentE2ReferenceSpec.from_json(args.config)
     paths = CurrentE2ArtifactPaths(
@@ -166,6 +186,13 @@ def main(argv: list[str] | None = None) -> int:
         falsification = run_current_e2_falsification_battery(result, falsification_spec)
         falsification_state = "RUN"
 
+    sparse_outcomes = None
+    sparse_outcome_state = "NOT_REQUESTED"
+    if args.sparse_outcome_family:
+        sparse_spec = CurrentE2SparseOutcomeSpec.from_json(args.sparse_outcome_config)
+        sparse_outcomes = run_current_e2_sparse_outcomes(result, sparse_spec)
+        sparse_outcome_state = "RUN"
+
     write_scoped_current_e2_reference_outputs(result, args.out)
     if inference is not None:
         write_current_e2_inference_outputs(inference, args.out)
@@ -173,6 +200,8 @@ def main(argv: list[str] | None = None) -> int:
         write_current_e2_influence_outputs(influence, args.out)
     if falsification is not None:
         write_current_e2_falsification_outputs(falsification, args.out)
+    if sparse_outcomes is not None:
+        write_current_e2_sparse_outcome_outputs(sparse_outcomes, args.out)
 
     primary = result["calibration"]["cells"][spec.primary_cell.cell_id]
     state = "PASS" if primary["estimation_permitted"] else "BLOCKED"
@@ -186,7 +215,8 @@ def main(argv: list[str] | None = None) -> int:
         f"observability={result['observability_state']} "
         f"inference_calibration={inference_state} "
         f"influence_stability={influence_state} "
-        f"falsification_battery={falsification_state} out={Path(args.out).resolve()}",
+        f"falsification_battery={falsification_state} "
+        f"sparse_outcome_family={sparse_outcome_state} out={Path(args.out).resolve()}",
         flush=True,
     )
     return 0
