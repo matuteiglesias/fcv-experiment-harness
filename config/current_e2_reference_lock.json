@@ -1,0 +1,14 @@
+{
+  "schema": "current_e2_reference_lock.v1",
+  "lock_id": "current_e2_reference_v1",
+  "reference_id": "current_geogcdf_acled_e2_v1",
+  "config_sha256": "7a23884cd4d2b154e5993a7621e1dfd76461a37e07359b478c0b56a7a6e5dbc0",
+  "primary_cell_id": "record_present",
+  "expected_inputs": {
+    "geography_sha256": "f136bb8c4294090abc7b03ff8a28e7b7717cc0a972e79ac761e38bc42f874663",
+    "treatment_sha256": "b6c2afcb3f37f2f52989fa946fb408788aaabc5bd864bf3ddd59fc46fdfb3394",
+    "outcome_sha256": "bffb63a924253255574aa3d84c090a1c7246cfad527f91fecfbed3b5f2d445f8"
+  },
+  "expected_analysis_country_count": 47,
+  "note": "Locks the upstream empirical bytes and canonical config for current_e2_reference_v1. The exact 47-country list, PRIMARY frame SHA, harness commit, and supported software environment are recorded by reference_identity.json at execution time."
+}
