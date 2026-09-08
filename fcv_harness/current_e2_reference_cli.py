@@ -3,6 +3,11 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from .current_e2_falsification import (
+    CurrentE2FalsificationSpec,
+    run_current_e2_falsification_battery,
+    write_current_e2_falsification_outputs,
+)
 from .current_e2_inference import (
     CurrentE2InferenceSuiteSpec,
     run_current_e2_inference_suite,
@@ -87,6 +92,19 @@ def parser() -> argparse.ArgumentParser:
         default="config/current_e2_influence_stability.json",
         help="Frozen R3 influence suite declaration.",
     )
+    ap.add_argument(
+        "--falsification-battery",
+        action="store_true",
+        help=(
+            "Run the frozen R4 negative-control battery: existing t-1 placebo, deeper t-2 "
+            "placebo, future-treatment placebo, and structured within-country treatment-history null."
+        ),
+    )
+    ap.add_argument(
+        "--falsification-config",
+        default="config/current_e2_falsification_battery.json",
+        help="Frozen R4 falsification suite declaration.",
+    )
     return ap
 
 
@@ -96,6 +114,8 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("--inference-calibration requires --reference-lock")
     if args.influence_stability and not args.reference_lock:
         raise ValueError("--influence-stability requires --reference-lock")
+    if args.falsification_battery and not args.reference_lock:
+        raise ValueError("--falsification-battery requires --reference-lock")
 
     spec = CurrentE2ReferenceSpec.from_json(args.config)
     paths = CurrentE2ArtifactPaths(
@@ -139,11 +159,20 @@ def main(argv: list[str] | None = None) -> int:
         influence = run_current_e2_influence_stability(result, influence_spec)
         influence_state = "RUN"
 
+    falsification = None
+    falsification_state = "NOT_REQUESTED"
+    if args.falsification_battery:
+        falsification_spec = CurrentE2FalsificationSpec.from_json(args.falsification_config)
+        falsification = run_current_e2_falsification_battery(result, falsification_spec)
+        falsification_state = "RUN"
+
     write_scoped_current_e2_reference_outputs(result, args.out)
     if inference is not None:
         write_current_e2_inference_outputs(inference, args.out)
     if influence is not None:
         write_current_e2_influence_outputs(influence, args.out)
+    if falsification is not None:
+        write_current_e2_falsification_outputs(falsification, args.out)
 
     primary = result["calibration"]["cells"][spec.primary_cell.cell_id]
     state = "PASS" if primary["estimation_permitted"] else "BLOCKED"
@@ -156,7 +185,8 @@ def main(argv: list[str] | None = None) -> int:
         f"execution_identity={identity['execution_identity_sha256'][:12]} "
         f"observability={result['observability_state']} "
         f"inference_calibration={inference_state} "
-        f"influence_stability={influence_state} out={Path(args.out).resolve()}",
+        f"influence_stability={influence_state} "
+        f"falsification_battery={falsification_state} out={Path(args.out).resolve()}",
         flush=True,
     )
     return 0
