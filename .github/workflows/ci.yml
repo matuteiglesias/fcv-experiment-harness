@@ -59,6 +59,8 @@ jobs:
           python tests_fully_contracted_calibration.py
           python tests_calibration_lab.py
           python tests_observability.py
+          python tests_reference_identity.py
+          python tests_inference_calibration.py
           python tests_current_e2_reference.py
           python tests_current_e2_scope.py
           python tests_current_e2_robustness.py
@@ -72,7 +74,7 @@ jobs:
 
       - name: Verify current E2 configs have no legacy treatment vocabulary
         run: |
-          if grep -E "jobcat|legacy_2023|wbad|wbkg|cn_record_present|cn_amount_positive" config/current_geogcdf_acled_e2.json config/current_geogcdf_acled_e2_robustness.json; then
+          if grep -E "jobcat|legacy_2023|wbad|wbkg|cn_record_present|cn_amount_positive" config/current_geogcdf_acled_e2.json config/current_geogcdf_acled_e2_robustness.json config/current_e2_reference_lock.json; then
             echo "current E2 reference/robustness config contains legacy project-treatment semantics" >&2
             exit 1
           fi
