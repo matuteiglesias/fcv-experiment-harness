@@ -1,0 +1,34 @@
+{
+  "schema": "current_e2_inference_calibration.v1",
+  "suite_id": "current_e2_inference_v1",
+  "purpose": "calibration",
+  "reference_id": "current_geogcdf_acled_e2_v1",
+  "primary_cell_id": "record_present",
+  "required_analysis_identity_sha256": "8d30161872363d6e43af6334d258b351acf68cadab38d73923a0781eb42f513a",
+  "required_primary_frame_sha256": "e82f273a61a91d5dbc772b775d1b0b2107b0b5c9e3c637f8b9cfadd8078b737f",
+  "effect_sizes_sd": [0.0, 0.02, 0.05, 0.10, 0.20],
+  "repetitions": 200,
+  "root_seed": 20260908,
+  "alpha": 0.05,
+  "monte_carlo_confidence": 0.95,
+  "methods": [
+    {
+      "method_id": "ADM2_CLUSTER",
+      "kind": "cluster_normal",
+      "cluster_col": "GID"
+    },
+    {
+      "method_id": "COUNTRY_CLUSTER_T",
+      "kind": "cluster_t",
+      "cluster_col": "country_iso3"
+    },
+    {
+      "method_id": "WILD_COUNTRY_BOOTSTRAP",
+      "kind": "wild_cluster_bootstrap",
+      "cluster_col": "country_iso3",
+      "bootstrap_repetitions": 399,
+      "bootstrap_root_seed": 20260908
+    }
+  ],
+  "note": "Binds the R1 paired inference-calibration kernel to the exact locked current-E2 PRIMARY frame. This suite reuses the existing in-memory projected frame and does not re-ingest, re-project, redefine treatment, or persist row-level analysis data."
+}
