@@ -8,6 +8,11 @@ from .current_e2_inference import (
     run_current_e2_inference_suite,
     write_current_e2_inference_outputs,
 )
+from .current_e2_influence import (
+    CurrentE2InfluenceSpec,
+    run_current_e2_influence_stability,
+    write_current_e2_influence_outputs,
+)
 from .current_e2_reference import CurrentE2ArtifactPaths, CurrentE2ReferenceSpec
 from .current_e2_scope import (
     run_scoped_current_e2_reference,
@@ -69,6 +74,19 @@ def parser() -> argparse.ArgumentParser:
         default="config/current_e2_inference_calibration.json",
         help="Frozen R2 inference suite declaration.",
     )
+    ap.add_argument(
+        "--influence-stability",
+        action="store_true",
+        help=(
+            "Run the frozen R3 country/period omission and bounded ADM2 influence suite "
+            "on the exact already-prepared PRIMARY frame. Requires --reference-lock."
+        ),
+    )
+    ap.add_argument(
+        "--influence-config",
+        default="config/current_e2_influence_stability.json",
+        help="Frozen R3 influence suite declaration.",
+    )
     return ap
 
 
@@ -76,6 +94,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     if args.inference_calibration and not args.reference_lock:
         raise ValueError("--inference-calibration requires --reference-lock")
+    if args.influence_stability and not args.reference_lock:
+        raise ValueError("--influence-stability requires --reference-lock")
 
     spec = CurrentE2ReferenceSpec.from_json(args.config)
     paths = CurrentE2ArtifactPaths(
@@ -112,9 +132,18 @@ def main(argv: list[str] | None = None) -> int:
         inference = run_current_e2_inference_suite(result, suite)
         inference_state = "RUN"
 
+    influence = None
+    influence_state = "NOT_REQUESTED"
+    if args.influence_stability:
+        influence_spec = CurrentE2InfluenceSpec.from_json(args.influence_config)
+        influence = run_current_e2_influence_stability(result, influence_spec)
+        influence_state = "RUN"
+
     write_scoped_current_e2_reference_outputs(result, args.out)
     if inference is not None:
         write_current_e2_inference_outputs(inference, args.out)
+    if influence is not None:
+        write_current_e2_influence_outputs(influence, args.out)
 
     primary = result["calibration"]["cells"][spec.primary_cell.cell_id]
     state = "PASS" if primary["estimation_permitted"] else "BLOCKED"
@@ -126,7 +155,8 @@ def main(argv: list[str] | None = None) -> int:
         f"analysis_identity={identity['analysis_identity_sha256'][:12]} "
         f"execution_identity={identity['execution_identity_sha256'][:12]} "
         f"observability={result['observability_state']} "
-        f"inference_calibration={inference_state} out={Path(args.out).resolve()}",
+        f"inference_calibration={inference_state} "
+        f"influence_stability={influence_state} out={Path(args.out).resolve()}",
         flush=True,
     )
     return 0
