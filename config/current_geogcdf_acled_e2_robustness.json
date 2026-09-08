@@ -1,0 +1,28 @@
+{
+  "suite_id": "current_geogcdf_acled_e2_robustness_v1",
+  "purpose": "calibration_sensitivity",
+  "base_config": "config/current_geogcdf_acled_e2.json",
+  "reading_rule": "Each variant changes one declared scientific choice at a time. The canonical reference remains primary; no variant is selected by sign, magnitude, p-value, or gate outcome.",
+  "variants": [
+    {
+      "variant_id": "project_count_gt1",
+      "dimension": "treatment_intensity",
+      "description": "Require at least two resolved GeoGCDF commitment projects in an ADM2-period rather than any resolved project.",
+      "treatment_value_column": "project_count",
+      "treatment_threshold": 1.0
+    },
+    {
+      "variant_id": "core_window_2005_2012",
+      "dimension": "time_window",
+      "description": "Trim the first and last canonical treatment periods, retaining 2005-2006 through 2011-2012.",
+      "treatment_period_start": "2005-2006",
+      "treatment_period_end": "2011-2012"
+    },
+    {
+      "variant_id": "vac_event_count",
+      "dimension": "outcome_metric",
+      "description": "Use the native ACLED Violence against civilians event count instead of fatalities while keeping geography, timing, treatment, estimator, and gates unchanged.",
+      "outcome_value_column": "event_count"
+    }
+  ]
+}
