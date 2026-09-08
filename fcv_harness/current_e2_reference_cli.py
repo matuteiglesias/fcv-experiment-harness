@@ -3,11 +3,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from .current_e2_reference import (
-    CurrentE2ArtifactPaths,
-    CurrentE2ReferenceSpec,
-    run_current_e2_reference,
-    write_current_e2_reference_outputs,
+from .current_e2_reference import CurrentE2ArtifactPaths, CurrentE2ReferenceSpec
+from .current_e2_scope import (
+    run_scoped_current_e2_reference,
+    write_scoped_current_e2_reference_outputs,
 )
 
 
@@ -62,16 +61,18 @@ def main(argv: list[str] | None = None) -> int:
         outcome_manifest_path=Path(args.outcome_manifest),
         outcome_dataset_id=args.outcome_dataset_id,
     )
-    result = run_current_e2_reference(
+    result = run_scoped_current_e2_reference(
         spec,
         paths,
         run_observability=args.observability,
     )
-    write_current_e2_reference_outputs(result, args.out)
+    write_scoped_current_e2_reference_outputs(result, args.out)
     primary = result["calibration"]["cells"][spec.primary_cell.cell_id]
     state = "PASS" if primary["estimation_permitted"] else "BLOCKED"
+    scope = result["country_scope"]
     print(
         f"reference_id={spec.reference_id} primary_hard_gate_state={state} "
+        f"analysis_countries={len(scope['analysis_country_iso3'])} "
         f"observability={result['observability_state']} out={Path(args.out).resolve()}",
         flush=True,
     )
