@@ -65,31 +65,32 @@ jobs:
           python tests_current_e2_scope.py
           python tests_current_e2_robustness.py
           python tests_current_e2_inference.py
+          python tests_current_e2_influence.py
 
       - name: Verify active configs do not name the legacy ACLED aggregate
         run: |
-          if grep -R "agg_acled_africa" config/canonical_a2_T2_y2001.json config/analysis_surface_a2_T2_y2001.json config/resolved_wbad_record_acled_vac.json config/current_geogcdf_acled_e2.json config/current_geogcdf_acled_e2_robustness.json config/current_e2_inference_calibration.json; then
+          if grep -R "agg_acled_africa" config/canonical_a2_T2_y2001.json config/analysis_surface_a2_T2_y2001.json config/resolved_wbad_record_acled_vac.json config/current_geogcdf_acled_e2.json config/current_geogcdf_acled_e2_robustness.json config/current_e2_inference_calibration.json config/current_e2_influence_stability.json; then
             echo "active experiment config still references the legacy ACLED aggregate" >&2
             exit 1
           fi
 
       - name: Verify current E2 configs have no legacy treatment vocabulary
         run: |
-          if grep -E "jobcat|legacy_2023|wbad|wbkg|cn_record_present|cn_amount_positive" config/current_geogcdf_acled_e2.json config/current_geogcdf_acled_e2_robustness.json config/current_e2_reference_lock.json config/current_e2_inference_calibration.json; then
-            echo "current E2 reference/robustness/inference config contains legacy project-treatment semantics" >&2
+          if grep -E "jobcat|legacy_2023|wbad|wbkg|cn_record_present|cn_amount_positive" config/current_geogcdf_acled_e2.json config/current_geogcdf_acled_e2_robustness.json config/current_e2_reference_lock.json config/current_e2_inference_calibration.json config/current_e2_influence_stability.json; then
+            echo "current E2 reference/robustness/inference/influence config contains legacy project-treatment semantics" >&2
             exit 1
           fi
 
       - name: Verify active projection code does not reconstruct raw ACLED fields
         run: |
-          if grep -E "FATALITIES|EVENT_TYPE|GEO_PRECISION" fcv_harness/measurement_projection.py fcv_harness/contracted_surface.py fcv_harness/contracted_experiment.py fcv_harness/contracted_calibration.py fcv_harness/fully_contracted_experiment.py fcv_harness/fully_contracted_calibration.py fcv_harness/current_e2_reference.py fcv_harness/current_e2_scope.py fcv_harness/current_e2_robustness.py fcv_harness/current_e2_inference.py; then
+          if grep -E "FATALITIES|EVENT_TYPE|GEO_PRECISION" fcv_harness/measurement_projection.py fcv_harness/contracted_surface.py fcv_harness/contracted_experiment.py fcv_harness/contracted_calibration.py fcv_harness/fully_contracted_experiment.py fcv_harness/fully_contracted_calibration.py fcv_harness/current_e2_reference.py fcv_harness/current_e2_scope.py fcv_harness/current_e2_robustness.py fcv_harness/current_e2_inference.py fcv_harness/current_e2_influence.py; then
             echo "active contracted projection code contains raw ACLED ingestion field names" >&2
             exit 1
           fi
 
       - name: Verify fully contracted investment path has no legacy treatment semantics
         run: |
-          if grep -E "jobcat|cn_record_present|cn_amount_positive|wbad_record_present|wbkg_record_present|legacy_2023" fcv_harness/fully_contracted_experiment.py fcv_harness/fully_contracted_calibration.py fcv_harness/current_e2_reference.py fcv_harness/current_e2_scope.py fcv_harness/current_e2_robustness.py fcv_harness/current_e2_inference.py; then
+          if grep -E "jobcat|cn_record_present|cn_amount_positive|wbad_record_present|wbkg_record_present|legacy_2023" fcv_harness/fully_contracted_experiment.py fcv_harness/fully_contracted_calibration.py fcv_harness/current_e2_reference.py fcv_harness/current_e2_scope.py fcv_harness/current_e2_robustness.py fcv_harness/current_e2_inference.py fcv_harness/current_e2_influence.py; then
             echo "fully contracted investment path contains legacy project-treatment semantics" >&2
             exit 1
           fi
