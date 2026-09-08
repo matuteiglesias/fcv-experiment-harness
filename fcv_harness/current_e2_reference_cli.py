@@ -3,6 +3,11 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from .current_e2_inference import (
+    CurrentE2InferenceSuiteSpec,
+    run_current_e2_inference_suite,
+    write_current_e2_inference_outputs,
+)
 from .current_e2_reference import CurrentE2ArtifactPaths, CurrentE2ReferenceSpec
 from .current_e2_scope import (
     run_scoped_current_e2_reference,
@@ -51,11 +56,27 @@ def parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Run the frozen observability grid only if the PRIMARY hard gates permit estimation.",
     )
+    ap.add_argument(
+        "--inference-calibration",
+        action="store_true",
+        help=(
+            "Run the frozen R2 inference-calibration suite on the already-prepared "
+            "PRIMARY frame. Requires --reference-lock and a matching R0 identity."
+        ),
+    )
+    ap.add_argument(
+        "--inference-config",
+        default="config/current_e2_inference_calibration.json",
+        help="Frozen R2 inference suite declaration.",
+    )
     return ap
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
+    if args.inference_calibration and not args.reference_lock:
+        raise ValueError("--inference-calibration requires --reference-lock")
+
     spec = CurrentE2ReferenceSpec.from_json(args.config)
     paths = CurrentE2ArtifactPaths(
         geography_data_path=Path(args.geography_data),
@@ -83,7 +104,18 @@ def main(argv: list[str] | None = None) -> int:
         config_path=args.config,
         lock=lock,
     )
+
+    inference = None
+    inference_state = "NOT_REQUESTED"
+    if args.inference_calibration:
+        suite = CurrentE2InferenceSuiteSpec.from_json(args.inference_config)
+        inference = run_current_e2_inference_suite(result, suite)
+        inference_state = "RUN"
+
     write_scoped_current_e2_reference_outputs(result, args.out)
+    if inference is not None:
+        write_current_e2_inference_outputs(inference, args.out)
+
     primary = result["calibration"]["cells"][spec.primary_cell.cell_id]
     state = "PASS" if primary["estimation_permitted"] else "BLOCKED"
     scope = result["country_scope"]
@@ -93,7 +125,8 @@ def main(argv: list[str] | None = None) -> int:
         f"analysis_countries={len(scope['analysis_country_iso3'])} "
         f"analysis_identity={identity['analysis_identity_sha256'][:12]} "
         f"execution_identity={identity['execution_identity_sha256'][:12]} "
-        f"observability={result['observability_state']} out={Path(args.out).resolve()}",
+        f"observability={result['observability_state']} "
+        f"inference_calibration={inference_state} out={Path(args.out).resolve()}",
         flush=True,
     )
     return 0
