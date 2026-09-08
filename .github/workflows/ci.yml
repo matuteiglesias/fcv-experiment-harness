@@ -69,6 +69,7 @@ jobs:
           python tests_current_e2_falsification.py
           python tests_current_e2_sparse_outcomes.py
           python tests_briggs_lane_b.py
+          python tests_briggs_pragmatic.py
 
       - name: Verify active configs do not name the legacy ACLED aggregate
         run: |
