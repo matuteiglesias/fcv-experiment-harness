@@ -8,6 +8,10 @@ from .current_e2_scope import (
     run_scoped_current_e2_reference,
     write_scoped_current_e2_reference_outputs,
 )
+from .reference_identity import (
+    CurrentE2ReferenceLock,
+    build_current_e2_reference_identity,
+)
 
 
 def parser() -> argparse.ArgumentParser:
@@ -15,6 +19,13 @@ def parser() -> argparse.ArgumentParser:
         description="Run the frozen current GeoGCDF→ACLED E2 reference from governed artifacts."
     )
     ap.add_argument("--config", required=True)
+    ap.add_argument(
+        "--reference-lock",
+        help=(
+            "Optional fail-closed lock for canonical config/upstream artifact hashes. "
+            "Use config/current_e2_reference_lock.json for current_e2_reference_v1."
+        ),
+    )
     ap.add_argument("--geography-data", required=True)
     ap.add_argument("--geography-manifest", required=True)
     ap.add_argument("--geography-dataset-id", default="gadm_native_adm2")
@@ -66,13 +77,22 @@ def main(argv: list[str] | None = None) -> int:
         paths,
         run_observability=args.observability,
     )
+    lock = CurrentE2ReferenceLock.from_json(args.reference_lock) if args.reference_lock else None
+    result["reference_identity"] = build_current_e2_reference_identity(
+        result,
+        config_path=args.config,
+        lock=lock,
+    )
     write_scoped_current_e2_reference_outputs(result, args.out)
     primary = result["calibration"]["cells"][spec.primary_cell.cell_id]
     state = "PASS" if primary["estimation_permitted"] else "BLOCKED"
     scope = result["country_scope"]
+    identity = result["reference_identity"]
     print(
         f"reference_id={spec.reference_id} primary_hard_gate_state={state} "
         f"analysis_countries={len(scope['analysis_country_iso3'])} "
+        f"analysis_identity={identity['analysis_identity_sha256'][:12]} "
+        f"execution_identity={identity['execution_identity_sha256'][:12]} "
         f"observability={result['observability_state']} out={Path(args.out).resolve()}",
         flush=True,
     )

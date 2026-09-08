@@ -31,6 +31,7 @@ from .fully_contracted_experiment import (
 from .lattice_diagnostics import derive_country_iso3
 from .measurement_projection import MeasurementProjectionSpec
 from .observability import run_e2_observability, write_observability_outputs
+from .reference_identity import stable_frame_sha256, write_reference_identity
 
 
 @dataclass(frozen=True)
@@ -447,10 +448,11 @@ def run_current_e2_reference(
 
 
 def _frame_sha256(frame: pd.DataFrame, spec: CurrentE2ReferenceSpec) -> str:
-    ordered = frame.sort_values([spec.unit_col, spec.period_col]).reset_index(drop=True)
-    return hashlib.sha256(
-        ordered.to_csv(index=False, lineterminator="\n").encode("utf-8")
-    ).hexdigest()
+    return stable_frame_sha256(
+        frame,
+        unit_col=spec.unit_col,
+        period_col=spec.period_col,
+    )
 
 
 def write_current_e2_reference_outputs(result: dict[str, Any], out_dir: str | Path) -> Path:
@@ -493,6 +495,15 @@ def write_current_e2_reference_outputs(result: dict[str, Any], out_dir: str | Pa
         },
         "observability_state": result["observability_state"],
     }
+    identity = result.get("reference_identity")
+    if identity is not None:
+        write_reference_identity(identity, out / "reference_identity.json")
+        payload["reference_identity"] = {
+            "path": "reference_identity.json",
+            "analysis_identity_sha256": identity["analysis_identity_sha256"],
+            "execution_identity_sha256": identity["execution_identity_sha256"],
+            "analysis_frame_persisted": False,
+        }
     (out / "reference_run.json").write_text(
         json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",

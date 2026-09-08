@@ -128,7 +128,14 @@ from .calibration_lab import (
     render_instrument_health_report,
     run_calibration_benchmark,
     run_calibration_suite,
-    write_calibration_suite_outputs)
+    write_calibration_suite_outputs,
+)
+from .simulation_worlds import (
+    ObservabilityDesign,
+    ObservabilityWorld,
+    generate_observability_world,
+    prepare_observability_design,
+)
 from .observability import (
     derive_repetition_seed,
     inject_known_effect,
@@ -137,4 +144,24 @@ from .observability import (
     summarize_observability,
     wild_cluster_signs,
     write_observability_outputs,
+)
+from .inference_calibration import (
+    InferenceMethodSpec,
+    PreparedInferenceDesign,
+    default_e2_inference_methods,
+    estimate_with_inference_method,
+    prepare_inference_design,
+    run_inference_calibration,
+    summarize_inference_calibration,
+    wilson_interval,
+    write_inference_calibration_outputs,
+)
+from .reference_identity import (
+    CurrentE2ReferenceLock,
+    build_current_e2_reference_identity,
+    collect_runtime_environment,
+    discover_git_state,
+    stable_frame_sha256,
+    verify_current_e2_reference_lock,
+    write_reference_identity,
 )
