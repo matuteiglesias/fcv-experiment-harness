@@ -3,16 +3,13 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from .current_e2_reference import (
-    CurrentE2ArtifactPaths,
-    CurrentE2ReferenceSpec,
-    run_current_e2_reference,
-)
+from .current_e2_reference import CurrentE2ArtifactPaths, CurrentE2ReferenceSpec
 from .current_e2_robustness import (
     CurrentE2RobustnessSuite,
     run_current_e2_robustness,
     write_current_e2_robustness_outputs,
 )
+from .current_e2_scope import run_scoped_current_e2_reference
 
 
 def parser() -> argparse.ArgumentParser:
@@ -66,11 +63,12 @@ def main(argv: list[str] | None = None) -> int:
         outcome_manifest_path=Path(args.outcome_manifest),
         outcome_dataset_id=args.outcome_dataset_id,
     )
-    canonical = run_current_e2_reference(base_spec, paths, run_observability=False)
+    canonical = run_scoped_current_e2_reference(base_spec, paths, run_observability=False)
     result = run_current_e2_robustness(canonical, suite)
     write_current_e2_robustness_outputs(result, args.out)
     print(
         f"suite_id={suite.suite_id} variants={len(suite.variants)} "
+        f"analysis_countries={len(canonical['country_scope']['analysis_country_iso3'])} "
         f"out={Path(args.out).resolve()}",
         flush=True,
     )
