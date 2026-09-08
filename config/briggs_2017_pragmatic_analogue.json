@@ -1,0 +1,64 @@
+{
+  "schema": "briggs_2017_pragmatic_analogue.v1",
+  "benchmark_id": "briggs_2017_regional_aid_pragmatic_v1",
+  "purpose": "calibration_analogue",
+  "reading_rule": "Compare direction, scale, and drift against Briggs without claiming source-identical reproduction. Published replication files remain evaluation oracles only.",
+  "analysis_countries": ["BEN", "COD", "ETH", "GHA", "KEN", "LSO", "MLI", "MOZ", "NER", "NGA", "RWA", "SLE", "ZMB"],
+  "excluded_published_countries": {
+    "GIN": "historical DHS HR release unavailable locally",
+    "NAM": "historical DHS HR release unavailable locally",
+    "MWI": "available HR dictionary lacks HV270",
+    "TZA": "available HR dictionary lacks HV270"
+  },
+  "dhs": {
+    "wealth_quintile_source_variable": "HV270",
+    "sample_weight_source_variable": "HV005",
+    "de_jure_household_size_source_variable": "HV012",
+    "region_source_variable": "HV024",
+    "regional_share_definition": "sum(HV005*HV012) within GADM-mapped region and quintile divided by country-wide sum(HV005*HV012) within quintile"
+  },
+  "geography": {
+    "provider": "GADM",
+    "version": "4.1",
+    "level": "adm1",
+    "historical_entity_parity_required": false,
+    "known_divergence": "current GADM ADM1 replaces Briggs historical survey-era/GAUL region ontology"
+  },
+  "aid": {
+    "donors": ["World Bank", "African Development Bank"],
+    "approval_years": [2009, 2010],
+    "precision_rule": "precision < 5",
+    "world_bank_parent_identity": "Project ID",
+    "afdb_parent_identity": "normalized Project Name fallback",
+    "child_identity": "GeoNameID",
+    "location_record_policy": "one deterministic parent-child pair after declared eligibility",
+    "value_allocation": "divide one parent amount equally across eligible geocoded parent-child pairs before analysis-country restriction",
+    "world_bank_amount_field": "Total Amt",
+    "afdb_amount_field": "Project Cost",
+    "known_divergence": "parent/child semantics are source-informed heuristics rather than recovered Briggs code semantics"
+  },
+  "conflict_control": {
+    "source": "current governed ACLED historical export",
+    "event_type": "Battles",
+    "start_date": "2007-01-01",
+    "end_date": "2008-12-31",
+    "geography": "current GADM 4.1 ADM1",
+    "known_divergence": "later ACLED vintage and current GADM geography"
+  },
+  "models": {
+    "core": "logCost ~ log_poorest + log_richest + C(country_iso3)",
+    "preferred_analogue": "logCost ~ log_poorest + log_richest + capital + battles + log_area + C(country_iso3)"
+  },
+  "oracle": {
+    "published_country_count": 17,
+    "published_region_count": 195,
+    "published_log_richest": 0.72034,
+    "published_log_richest_se": 0.20316,
+    "published_log_poorest": 0.10460,
+    "published_log_poorest_se": 0.08568,
+    "published_within_r2": 0.23685,
+    "published_total_locations": 1351,
+    "published_world_bank_locations": 856,
+    "published_afdb_locations": 495
+  }
+}
