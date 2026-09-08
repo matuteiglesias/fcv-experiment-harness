@@ -24,9 +24,18 @@ Every successful current E2 run now also emits `reference_identity.json` contain
 
 The analysis frame itself is never persisted by this identity mechanism.
 
+The first locked real current-E2 run established:
+
+- analysis identity `8d30161872363d6e43af6334d258b351acf68cadab38d73923a0781eb42f513a`;
+- PRIMARY frame SHA-256 `e82f273a61a91d5dbc772b775d1b0b2107b0b5c9e3c637f8b9cfadd8078b737f`;
+- 47-country treatment-authorized scope;
+- PRIMARY hard-gate state `PASS`.
+
 This lets later calibration packets state exactly:
 
 > I tested this scientific frame, produced from these bytes, under this numerical implementation.
+
+The locked run that established those analysis identities used a system SciPy/NumPy combination that emitted a compatibility warning. That does not alter the analysis identity, but its execution identity is not treated as the final clean numerical checkpoint. A supported-environment reproduction should therefore remain part of acceptance.
 
 ## R1 — paired inference calibration
 
@@ -87,6 +96,42 @@ inference_calibration/
 
 The repetition-level table remains available in memory to the caller but is not written by the standard aggregate writer. The empirical analysis frame is never written.
 
+## R2 — bind R1 to the exact current-E2 PRIMARY frame
+
+`config/current_e2_inference_calibration.json` freezes the current real R2 suite against the R0 analysis identity and PRIMARY frame fingerprint above.
+
+`run_current_e2_inference_suite(...)` is intentionally a thin adapter. It accepts an already-executed current-E2 reference result and refuses to run unless all of the following are true:
+
+- the reference lock is verified;
+- `reference_id` and PRIMARY cell match;
+- PRIMARY hard gates permit estimation;
+- the current in-memory PRIMARY frame SHA-256 exactly matches the frozen R0 fingerprint;
+- the R0 analysis identity exactly matches the frozen R2 declaration;
+- treatment and outcome MeasurementContract identities are unchanged;
+- upstream geography/treatment/outcome hashes match the reference identity;
+- effect-size grid, repetitions and root seed match the frozen observability declaration.
+
+The adapter then calls the generic R1 kernel **on `primary["frame"]` itself**. It does not reload empirical files, rebuild a panel, create another projection, redefine treatment, or persist row-level analysis data.
+
+The frozen first R2 suite uses the same `[0, .02, .05, .10, .20]` SD grid, 200 outer repetitions and root seed `20260908`. The wild-country bootstrap uses 399 inner Rademacher repetitions.
+
+In addition to the R1 aggregate packet, R2 writes:
+
+```text
+inference_calibration/reference_binding.json
+```
+
+which records the analysis/execution identities, frame fingerprint, input hashes, measurement IDs, hard-gate state and explicit `reprojection_performed=false` / `reingestion_performed=false` assertions. `reference_run.json` is amended with the same aggregate R2 binding metadata.
+
+The reference CLI exposes this stage through:
+
+```text
+--inference-calibration
+--inference-config config/current_e2_inference_calibration.json
+```
+
+and requires `--reference-lock` when R2 is requested.
+
 ## Interpretation firewall
 
 Do not choose the method with the smallest standard error.
@@ -104,7 +149,8 @@ A method can be wider and scientifically preferable if its uncertainty is better
 
 ## Current execution order
 
-1. reproduce the current E2 reference in a supported clean numerical environment;
-2. run the existing full observability grid on that exact PRIMARY frame;
-3. bind this inference-calibration kernel to the same frozen frame in the current-E2 adapter stage;
-4. only then add influence, deeper falsification, sparse-outcome robustness, or spatial-HAC inference.
+1. reproduce the locked current E2 reference in a supported clean numerical environment;
+2. run the full observability grid on that exact PRIMARY frame;
+3. run R2 inference calibration on that same in-memory PRIMARY frame;
+4. compare detector power, null size and interval coverage across the declared uncertainty family;
+5. only then add influence, deeper falsification, sparse-outcome robustness, or spatial-HAC inference.
