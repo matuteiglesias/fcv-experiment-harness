@@ -1,0 +1,41 @@
+{
+  "schema": "current_e2_sparse_outcome_family.v1",
+  "suite_id": "current_e2_sparse_outcomes_v1",
+  "purpose": "calibration_sensitivity",
+  "reference_id": "current_geogcdf_acled_e2_v1",
+  "primary_cell_id": "record_present",
+  "required_analysis_identity_sha256": "8d30161872363d6e43af6334d258b351acf68cadab38d73923a0781eb42f513a",
+  "required_primary_frame_sha256": "e82f273a61a91d5dbc772b775d1b0b2107b0b5c9e3c637f8b9cfadd8078b737f",
+  "source_event_count_column": "event_count",
+  "binary_derivation": "event_count_gt_zero",
+  "models": [
+    {
+      "model_id": "ols_event_count",
+      "outcome_representation": "VAC event count",
+      "estimator": "OLS",
+      "natural_primary_metric": "absolute_difference",
+      "natural_primary_unit": "events",
+      "natural_secondary_metric": "standardized_difference",
+      "natural_secondary_unit": "outcome_sd"
+    },
+    {
+      "model_id": "lpm_any_vac",
+      "outcome_representation": "any VAC event",
+      "estimator": "LPM",
+      "natural_primary_metric": "probability_difference",
+      "natural_primary_unit": "probability",
+      "natural_secondary_metric": "percentage_point_difference",
+      "natural_secondary_unit": "percentage_points"
+    },
+    {
+      "model_id": "ppml_event_count",
+      "outcome_representation": "VAC event count",
+      "estimator": "PPML",
+      "natural_primary_metric": "incidence_rate_ratio",
+      "natural_primary_unit": "ratio",
+      "natural_secondary_metric": "average_marginal_event_count_difference",
+      "natural_secondary_unit": "events"
+    }
+  ],
+  "reading_rule": "The canonical OLS fatalities estimate remains primary. Sparse-outcome models are predeclared representation sensitivities, not specification search. Raw coefficients across model families are never compared as if they shared units. No hurdle model is included in this wave."
+}
