@@ -1,0 +1,16 @@
+{
+  "schema": "current_e2_falsification_battery.v1",
+  "suite_id": "current_e2_falsification_v1",
+  "purpose": "calibration",
+  "reference_id": "current_geogcdf_acled_e2_v1",
+  "primary_cell_id": "record_present",
+  "required_analysis_identity_sha256": "8d30161872363d6e43af6334d258b351acf68cadab38d73923a0781eb42f513a",
+  "required_primary_frame_sha256": "e82f273a61a91d5dbc772b775d1b0b2107b0b5c9e3c637f8b9cfadd8078b737f",
+  "deep_pre_timing_offset": -2,
+  "future_treatment_timing_offset": 1,
+  "current_outcome_timing_offset": 0,
+  "permutation_policy": "within_country_complete_treatment_history",
+  "permutation_repetitions": 1000,
+  "permutation_root_seed": 20260908,
+  "note": "Negative-control characterization only. Existing t-1 placebo, deeper t-2 placebo, future-treatment placebo, and a within-country complete-history permutation null cannot replace the canonical estimate or justify specification search."
+}
