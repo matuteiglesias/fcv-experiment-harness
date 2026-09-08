@@ -108,9 +108,7 @@ def default_e2_inference_methods(
     )
 
 
-def prepare_inference_design(
-    design: ObservabilityDesign,
-) -> PreparedInferenceDesign:
+def prepare_inference_design(design: ObservabilityDesign) -> PreparedInferenceDesign:
     """Freeze the OLS design matrix shared by every method and synthetic world."""
     formula = (
         f"{design.outcome_col} ~ {design.treatment_col} + {design.pre_outcome_col} + "
@@ -123,18 +121,16 @@ def prepare_inference_design(
         raise ValueError("treatment coefficient is absent from the inference design")
     treatment_index = names.index(design.treatment_col)
     pinv = np.linalg.pinv(exog)
-    xtx_inv = pinv @ pinv.T
     restricted_exog = np.delete(exog, treatment_index, axis=1)
-    restricted_pinv = np.linalg.pinv(restricted_exog)
     return PreparedInferenceDesign(
         sample=design.sample.copy(),
         exog=exog,
         exog_names=names,
         pinv_exog=pinv,
-        xtx_inv=xtx_inv,
+        xtx_inv=pinv @ pinv.T,
         treatment_index=treatment_index,
         restricted_exog=restricted_exog,
-        restricted_pinv=restricted_pinv,
+        restricted_pinv=np.linalg.pinv(restricted_exog),
         unit_col=design.unit_col,
         period_col=design.period_col,
         country_col=design.country_col,
@@ -151,8 +147,7 @@ def _group_codes(sample: pd.DataFrame, column: str) -> tuple[np.ndarray, tuple[s
     if len(labels) < 2:
         raise ValueError(f"inference requires at least two clusters in {column!r}")
     mapping = {label: index for index, label in enumerate(labels)}
-    codes = values.map(mapping).to_numpy(dtype=int)
-    return codes, labels
+    return values.map(mapping).to_numpy(dtype=int), labels
 
 
 def _ols_components(
@@ -163,8 +158,7 @@ def _ols_components(
     if y.shape != (prepared.n,):
         raise ValueError("synthetic outcome length does not match fixed inference design")
     beta = prepared.pinv_exog @ y
-    residual = y - prepared.exog @ beta
-    return beta, residual
+    return beta, y - prepared.exog @ beta
 
 
 def _cluster_standard_error(
@@ -178,19 +172,20 @@ def _cluster_standard_error(
     np.add.at(scores, codes, prepared.exog * residual[:, None])
     meat = scores.T @ scores
     covariance = prepared.xtx_inv @ meat @ prepared.xtx_inv
-    if groups > 1 and prepared.n > prepared.k:
-        correction = (groups / (groups - 1.0)) * (
+    if prepared.n > prepared.k:
+        covariance *= (groups / (groups - 1.0)) * (
             (prepared.n - 1.0) / (prepared.n - prepared.k)
         )
-        covariance *= correction
     variance = float(covariance[prepared.treatment_index, prepared.treatment_index])
-    se = float(np.sqrt(max(variance, 0.0)))
-    return se, groups
+    return float(np.sqrt(max(variance, 0.0))), groups
 
 
 def _stable_method_seed(root_seed: int, repetition_id: int, method_id: str) -> int:
-    method_digest = hashlib.sha256(method_id.encode("utf-8")).digest()
-    method_key = int.from_bytes(method_digest[:8], "big", signed=False)
+    method_key = int.from_bytes(
+        hashlib.sha256(method_id.encode("utf-8")).digest()[:8],
+        "big",
+        signed=False,
+    )
     state = np.random.SeedSequence(
         [int(root_seed), int(repetition_id), method_key]
     ).generate_state(1, dtype=np.uint64)
@@ -247,14 +242,7 @@ def _wild_cluster_bootstrap_inference(
     alpha: float,
     repetition_id: int,
 ) -> dict[str, Any]:
-    """Rademacher wild-country coefficient bootstrap with a null-imposed p-value.
-
-    The point estimate remains the exact same OLS coefficient used by every method.
-    An unrestricted wild bootstrap supplies the bootstrap standard deviation and
-    basic confidence interval. A restricted model without treatment supplies the
-    null-imposed coefficient distribution used for the two-sided zero-effect test.
-    This deliberately calibrates uncertainty; it never changes the estimand.
-    """
+    """Rademacher wild-country coefficient bootstrap with null-imposed test."""
     codes, labels = _group_codes(prepared.sample, method.cluster_col)
     groups = len(labels)
     effect = float(beta[prepared.treatment_index])
@@ -295,21 +283,18 @@ def _wild_cluster_bootstrap_inference(
         unrestricted_delta,
         [alpha / 2.0, 1.0 - alpha / 2.0],
     )
-    ci_low = float(effect - q_high)
-    ci_high = float(effect - q_low)
     p_value = float(
         (1 + np.count_nonzero(np.abs(null_effect) >= abs(effect)))
         / (int(method.bootstrap_repetitions) + 1)
     )
-    statistic = effect / se if se > 0 else np.nan
     return {
         "ok": bool(np.isfinite(effect) and np.isfinite(se) and se >= 0),
         "effect": effect,
         "se": se,
-        "statistic": statistic,
+        "statistic": effect / se if se > 0 else np.nan,
         "p_value": p_value,
-        "ci_low": ci_low,
-        "ci_high": ci_high,
+        "ci_low": float(effect - q_high),
+        "ci_high": float(effect - q_low),
         "critical_value": np.nan,
         "reference_df": np.nan,
         "reference_distribution": "wild_cluster_rademacher_coefficient_bootstrap",
@@ -346,7 +331,7 @@ def estimate_with_inference_method(
             alpha=alpha,
             repetition_id=repetition_id,
         )
-    else:  # pragma: no cover - dataclass validation prevents this
+    else:  # pragma: no cover
         raise AssertionError(method.kind)
     result.update(
         {
@@ -381,7 +366,7 @@ def wilson_interval(
     return float(max(0.0, center - half)), float(min(1.0, center + half))
 
 
-def _rate_row(
+def _rate(
     group: pd.DataFrame,
     column: str,
     *,
@@ -395,12 +380,31 @@ def _rate_row(
     return successes, trials, float(rate), low, high
 
 
+def _table(rows: list[dict[str, Any]], columns: Sequence[str], sort: Sequence[str]) -> pd.DataFrame:
+    """Construct schema-stable aggregate tables even when a grid arm is absent."""
+    table = pd.DataFrame(rows, columns=list(columns))
+    if len(table) and sort:
+        table = table.sort_values(list(sort)).reset_index(drop=True)
+    return table
+
+
+def _first_value(
+    table: pd.DataFrame,
+    mask: pd.Series,
+    column: str,
+    default: float = np.nan,
+) -> float:
+    selected = table.loc[mask, column]
+    return float(selected.iloc[0]) if len(selected) else default
+
+
 def summarize_inference_calibration(
     repetitions: pd.DataFrame,
     *,
     alpha: float,
     monte_carlo_confidence: float,
 ) -> dict[str, pd.DataFrame]:
+    """Summarize null size, interval quality and power without score-shopping."""
     if repetitions.empty:
         raise ValueError("inference calibration repetition table must not be empty")
 
@@ -408,11 +412,12 @@ def summarize_inference_calibration(
     width_rows: list[dict[str, Any]] = []
     power_rows: list[dict[str, Any]] = []
     null_rows: list[dict[str, Any]] = []
+
     for (method_id, effect_size), group in repetitions.groupby(
         ["method_id", "effect_size_sd"], sort=True, dropna=False
     ):
         estimated = group.loc[group["estimation_ok"].astype(bool)].copy()
-        covered, trials, coverage, cov_low, cov_high = _rate_row(
+        covered, trials, coverage, cov_low, cov_high = _rate(
             estimated,
             "ci_covers_truth",
             confidence=monte_carlo_confidence,
@@ -428,8 +433,7 @@ def summarize_inference_calibration(
                 "coverage_mc_high": cov_high,
                 "nominal_coverage": 1.0 - alpha,
                 "nominal_inside_mc_interval": bool(
-                    np.isfinite(cov_low)
-                    and cov_low <= 1.0 - alpha <= cov_high
+                    np.isfinite(cov_low) and cov_low <= 1.0 - alpha <= cov_high
                 ),
             }
         )
@@ -443,7 +447,7 @@ def summarize_inference_calibration(
                 "median_standard_error": float(estimated["standard_error"].median()) if len(estimated) else np.nan,
             }
         )
-        rejected, r_trials, rejection_rate, rej_low, rej_high = _rate_row(
+        rejected, r_trials, rejection_rate, rej_low, rej_high = _rate(
             estimated,
             "rejected",
             confidence=monte_carlo_confidence,
@@ -469,7 +473,7 @@ def summarize_inference_calibration(
                 }
             )
         else:
-            detected, d_trials, detection_rate, det_low, det_high = _rate_row(
+            detected, d_trials, detection_rate, det_low, det_high = _rate(
                 estimated,
                 "joint_detection",
                 confidence=monte_carlo_confidence,
@@ -490,13 +494,45 @@ def summarize_inference_calibration(
                 }
             )
 
-    coverage = pd.DataFrame(coverage_rows).sort_values(["method_id", "effect_size_sd"])
-    widths = pd.DataFrame(width_rows).sort_values(["method_id", "effect_size_sd"])
-    power = pd.DataFrame(power_rows).sort_values(["method_id", "effect_size_sd"])
-    null = pd.DataFrame(null_rows).sort_values("method_id")
+    coverage = _table(
+        coverage_rows,
+        (
+            "method_id", "effect_size_sd", "estimated_repetitions", "covered_repetitions",
+            "ci_coverage_rate", "coverage_mc_low", "coverage_mc_high", "nominal_coverage",
+            "nominal_inside_mc_interval",
+        ),
+        ("method_id", "effect_size_sd"),
+    )
+    widths = _table(
+        width_rows,
+        (
+            "method_id", "effect_size_sd", "estimated_repetitions", "median_ci_width",
+            "mean_ci_width", "median_standard_error",
+        ),
+        ("method_id", "effect_size_sd"),
+    )
+    power = _table(
+        power_rows,
+        (
+            "method_id", "effect_size_sd", "repetitions", "rejections", "rejection_rate",
+            "rejection_mc_low", "rejection_mc_high", "joint_detections",
+            "joint_detection_rate", "joint_detection_mc_low", "joint_detection_mc_high",
+        ),
+        ("method_id", "effect_size_sd"),
+    )
+    null = _table(
+        null_rows,
+        (
+            "method_id", "repetitions", "rejections", "false_positive_rate",
+            "false_positive_mc_low", "false_positive_mc_high", "nominal_alpha",
+            "alpha_inside_mc_interval", "ci_coverage_zero", "coverage_mc_low",
+            "coverage_mc_high", "coefficient_mean", "coefficient_median",
+        ),
+        ("method_id",),
+    )
 
-    pair_rows: list[dict[str, Any]] = []
     methods = sorted(repetitions["method_id"].unique().tolist())
+    pair_rows: list[dict[str, Any]] = []
     for effect_size in sorted(repetitions["effect_size_sd"].unique().tolist()):
         effect_group = repetitions.loc[repetitions["effect_size_sd"].eq(effect_size)]
         for method_a, method_b in itertools.combinations(methods, 2):
@@ -527,41 +563,56 @@ def summarize_inference_calibration(
                     ),
                 }
             )
-    paired = pd.DataFrame(pair_rows)
-
-    summary_rows: list[dict[str, Any]] = []
-    positive_effects = sorted(
-        effect for effect in repetitions["effect_size_sd"].unique().tolist() if float(effect) > 0
+    paired = _table(
+        pair_rows,
+        (
+            "effect_size_sd", "method_a", "method_b", "paired_repetitions",
+            "max_abs_point_estimate_difference", "median_standard_error_difference_b_minus_a",
+            "median_ci_width_difference_b_minus_a", "rejection_disagreement_rate",
+            "coverage_disagreement_rate",
+        ),
+        ("effect_size_sd", "method_a", "method_b"),
     )
-    smallest_positive = float(positive_effects[0]) if positive_effects else np.nan
+
+    positive_effects = sorted(
+        float(effect)
+        for effect in repetitions["effect_size_sd"].unique().tolist()
+        if float(effect) > 0
+    )
+    smallest_positive = positive_effects[0] if positive_effects else np.nan
+    summary_rows: list[dict[str, Any]] = []
     for method_id in methods:
-        nrow = null.loc[null["method_id"].eq(method_id)]
-        prow = power.loc[
-            power["method_id"].eq(method_id)
-            & power["effect_size_sd"].eq(smallest_positive)
-        ]
-        wrow = widths.loc[
-            widths["method_id"].eq(method_id)
-            & widths["effect_size_sd"].eq(smallest_positive)
-        ]
+        nmask = null["method_id"].eq(method_id)
+        pmask = power["method_id"].eq(method_id) & power["effect_size_sd"].eq(smallest_positive)
+        wmask = widths["method_id"].eq(method_id) & widths["effect_size_sd"].eq(smallest_positive)
         method_rows = repetitions.loc[repetitions["method_id"].eq(method_id)]
         summary_rows.append(
             {
                 "method_id": method_id,
                 "method_kind": str(method_rows["method_kind"].iloc[0]),
                 "cluster_col": str(method_rows["cluster_col"].iloc[0]),
-                "null_false_positive_rate": float(nrow["false_positive_rate"].iloc[0]) if len(nrow) else np.nan,
-                "null_false_positive_mc_low": float(nrow["false_positive_mc_low"].iloc[0]) if len(nrow) else np.nan,
-                "null_false_positive_mc_high": float(nrow["false_positive_mc_high"].iloc[0]) if len(nrow) else np.nan,
-                "null_ci_coverage": float(nrow["ci_coverage_zero"].iloc[0]) if len(nrow) else np.nan,
+                "null_false_positive_rate": _first_value(null, nmask, "false_positive_rate"),
+                "null_false_positive_mc_low": _first_value(null, nmask, "false_positive_mc_low"),
+                "null_false_positive_mc_high": _first_value(null, nmask, "false_positive_mc_high"),
+                "null_ci_coverage": _first_value(null, nmask, "ci_coverage_zero"),
                 "smallest_positive_effect_sd": smallest_positive,
-                "power_at_smallest_effect": float(prow["rejection_rate"].iloc[0]) if len(prow) else np.nan,
-                "joint_detection_at_smallest_effect": float(prow["joint_detection_rate"].iloc[0]) if len(prow) else np.nan,
-                "median_ci_width_at_smallest_effect": float(wrow["median_ci_width"].iloc[0]) if len(wrow) else np.nan,
-                "median_se_at_smallest_effect": float(wrow["median_standard_error"].iloc[0]) if len(wrow) else np.nan,
+                "power_at_smallest_effect": _first_value(power, pmask, "rejection_rate"),
+                "joint_detection_at_smallest_effect": _first_value(power, pmask, "joint_detection_rate"),
+                "median_ci_width_at_smallest_effect": _first_value(widths, wmask, "median_ci_width"),
+                "median_se_at_smallest_effect": _first_value(widths, wmask, "median_standard_error"),
             }
         )
-    method_summary = pd.DataFrame(summary_rows).sort_values("method_id")
+    method_summary = _table(
+        summary_rows,
+        (
+            "method_id", "method_kind", "cluster_col", "null_false_positive_rate",
+            "null_false_positive_mc_low", "null_false_positive_mc_high", "null_ci_coverage",
+            "smallest_positive_effect_sd", "power_at_smallest_effect",
+            "joint_detection_at_smallest_effect", "median_ci_width_at_smallest_effect",
+            "median_se_at_smallest_effect",
+        ),
+        ("method_id",),
+    )
 
     return {
         "method_summary": method_summary,
@@ -584,15 +635,12 @@ def run_inference_calibration(
     alpha: float = 0.05,
     monte_carlo_confidence: float = 0.95,
 ) -> dict[str, Any]:
-    """Compare uncertainty procedures on identical real-frame synthetic worlds.
-
-    Every method sees the same OLS design, coefficient, synthetic truth and
-    stochastic realization. Only the uncertainty procedure changes. The result
-    is calibration evidence, never an automatic method-selection score.
-    """
+    """Compare uncertainty procedures on identical real-frame synthetic worlds."""
     effects = tuple(float(value) for value in effect_sizes_sd)
     if not effects or len(effects) != len(set(effects)):
         raise ValueError("effect_sizes_sd must be non-empty and unique")
+    if any(not np.isfinite(value) for value in effects):
+        raise ValueError("effect_sizes_sd values must be finite")
     if int(repetitions) <= 0:
         raise ValueError("repetitions must be positive")
     if int(root_seed) < 0:
