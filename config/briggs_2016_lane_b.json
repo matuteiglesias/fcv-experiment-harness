@@ -1,0 +1,39 @@
+{
+  "schema": "briggs_lane_b_reference.v1",
+  "reference_id": "briggs_2016_lane_b_v1",
+  "purpose": "calibration",
+  "reading_rule": "The Briggs replication package supplies oracle targets only. Lane B inputs must be independently reconstructed from source authority; parity differences are diagnostic evidence and may not select source semantics or specifications.",
+  "analysis_universe": {
+    "expected_country_count": 17,
+    "expected_region_count": 195,
+    "expected_total_subprojects": 1351,
+    "expected_world_bank_subprojects": 856,
+    "expected_afdb_subprojects": 495,
+    "expected_regions_with_aid": 145,
+    "expected_zero_aid_regions": 50
+  },
+  "transformations": {
+    "aid_approval_years": [2009, 2010],
+    "aiddata_precision_exclusive_upper_bound": 5,
+    "log_aid_offset": 0.1,
+    "log_wealth_share_offset": 0.001,
+    "country_fixed_effects": true,
+    "cluster_standard_errors_by": "country_id"
+  },
+  "table3_oracle": {
+    "model_1_share_value": {
+      "poorest_share": {"coefficient": 0.293417759584087, "se": 0.174354982734062},
+      "richest_share": {"coefficient": 0.611670851032808, "se": 0.217688431448279},
+      "within_r2": 0.225125839194468
+    },
+    "model_2_share_projects": {
+      "poorest_share": {"coefficient": 0.248516105877064, "se": 0.130528094818581},
+      "richest_share": {"coefficient": 0.663446137824598, "se": 0.213354462505416}
+    },
+    "model_3_log_value": {
+      "log_poorest": {"coefficient": 0.104596747828760, "se": 0.085682592829430},
+      "log_richest": {"coefficient": 0.720339078094815, "se": 0.203163292423164},
+      "within_r2": 0.236851017266650
+    }
+  }
+}
