@@ -1,0 +1,76 @@
+{
+  "schema": "briggs_2017_lane_b.v1",
+  "benchmark_id": "briggs_2017_regional_aid_lane_b_v1",
+  "purpose": "calibration",
+  "external_result": {
+    "paper": "Briggs (2017) Does Foreign Aid Target the Poorest?",
+    "replication_files_role": "evaluation_oracle_only",
+    "published_analysis_rows": 195,
+    "published_country_count": 17,
+    "published_main_model": "country fixed-effects OLS with country-clustered robust standard errors"
+  },
+  "country_surveys": [
+    {"country": "Benin", "country_iso3": "BEN", "survey_year": "2006"},
+    {"country": "DRC", "country_iso3": "COD", "survey_year": "2007"},
+    {"country": "Ethiopia", "country_iso3": "ETH", "survey_year": "2005"},
+    {"country": "Ghana", "country_iso3": "GHA", "survey_year": "2008"},
+    {"country": "Guinea", "country_iso3": "GIN", "survey_year": "2005"},
+    {"country": "Kenya", "country_iso3": "KEN", "survey_year": "2003"},
+    {"country": "Lesotho", "country_iso3": "LSO", "survey_year": "2004"},
+    {"country": "Malawi", "country_iso3": "MWI", "survey_year": "2004"},
+    {"country": "Mali", "country_iso3": "MLI", "survey_year": "2006"},
+    {"country": "Mozambique", "country_iso3": "MOZ", "survey_year": "2003"},
+    {"country": "Namibia", "country_iso3": "NAM", "survey_year": "2006"},
+    {"country": "Niger", "country_iso3": "NER", "survey_year": "2006"},
+    {"country": "Nigeria", "country_iso3": "NGA", "survey_year": "2008"},
+    {"country": "Rwanda", "country_iso3": "RWA", "survey_year": "2007-2008"},
+    {"country": "Sierra Leone", "country_iso3": "SLE", "survey_year": "2008"},
+    {"country": "Tanzania", "country_iso3": "TZA", "survey_year": "2004-2005"},
+    {"country": "Zambia", "country_iso3": "ZMB", "survey_year": "2007"}
+  ],
+  "dhs": {
+    "wealth_quintile_source_variable": "HV270",
+    "sample_weight_source_variable": "HV005",
+    "de_jure_household_size_source_variable": "HV012",
+    "regional_share_definition": "sum(HV005*HV012) within region and quintile divided by country-wide sum(HV005*HV012) within quintile"
+  },
+  "aid": {
+    "donors": ["World Bank", "African Development Bank"],
+    "approval_years": [2009, 2010],
+    "analysis_precision_rule": "precision < 5",
+    "parent_value_allocation": "equal across included geocoded subprojects_or_locations for each parent project",
+    "historical_source_archives": [
+      "AllWorldBank_IBRDIDA.csv.zip",
+      "AfDB_2009_2010_AllApprovedProjects.xlsx.zip"
+    ]
+  },
+  "conflict_control": {
+    "source_family": "ACLED",
+    "event_type": "Battles",
+    "start_date": "2007-01-01",
+    "end_date": "2008-12-31"
+  },
+  "geography": {
+    "level": "historical_adm1_equivalent",
+    "preferred_provider": "GAUL",
+    "modern_gadm_as_is_allowed": false,
+    "substitution_rule": "alternative polygon provider allowed only with explicit crosswalk to same historical region entities"
+  },
+  "derived_variables": {
+    "prop_totalproj": "region_project_count / country_project_count",
+    "prop_totalcost": "region_allocated_aid_value / country_allocated_aid_value",
+    "logCost": "ln(region_allocated_aid_value + 0.1)",
+    "log_poorest": "ln(poorest_share + 0.001)",
+    "log_richest": "ln(richest_share + 0.001)"
+  },
+  "oracle_targets": {
+    "total_regions": 195,
+    "total_included_aid_locations_or_subprojects": 1351,
+    "world_bank_included_locations_or_subprojects": 856,
+    "afdb_included_locations_or_subprojects": 495,
+    "regions_with_any_aid": 145,
+    "regions_with_zero_aid": 50,
+    "preferred_model_log_richest_coefficient": 0.72034,
+    "preferred_model_log_richest_se": 0.20316
+  }
+}
