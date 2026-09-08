@@ -22,18 +22,19 @@
   },
   "table3_oracle": {
     "model_1_share_value": {
-      "poorest_share": {"coefficient": 0.293417759584087, "se": 0.174354982734062},
-      "richest_share": {"coefficient": 0.611670851032808, "se": 0.217688431448279},
-      "within_r2": 0.225125839194468
+      "poorest_share": {"coefficient": 0.2934177595840866, "se": 0.17435498273406158},
+      "richest_share": {"coefficient": 0.611670851032808, "se": 0.21768843144827876},
+      "within_r2": 0.2251258391944675
     },
     "model_2_share_projects": {
-      "poorest_share": {"coefficient": 0.248516105877064, "se": 0.130528094818581},
-      "richest_share": {"coefficient": 0.663446137824598, "se": 0.213354462505416}
+      "poorest_share": {"coefficient": 0.24851978592250434, "se": 0.13052729789454967},
+      "richest_share": {"coefficient": 0.6634508973008394, "se": 0.2133481741824471},
+      "within_r2": 0.25052373608512524
     },
     "model_3_log_value": {
-      "log_poorest": {"coefficient": 0.104596747828760, "se": 0.085682592829430},
-      "log_richest": {"coefficient": 0.720339078094815, "se": 0.203163292423164},
-      "within_r2": 0.236851017266650
+      "log_poorest": {"coefficient": 0.10459787784353926, "se": 0.08567996143659788},
+      "log_richest": {"coefficient": 0.7203405621543294, "se": 0.20315574739116216},
+      "within_r2": 0.23684628242901373
     }
   }
 }
