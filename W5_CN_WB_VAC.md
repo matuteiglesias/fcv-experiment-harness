@@ -289,14 +289,19 @@ Source Gold remains unchanged. Reruns must preserve all declared
 exclusions and include every p-value and confidence interval.
 
 ## Scientific gate
-E0–E4 are executed. Publication-level claims remain **DIRECTOR REVIEW**,
+E0–E4 are executed, committed and merged into the canonical harness via
+[PR #29](https://github.com/matuteiglesias/fcv-experiment-harness/pull/29).
+The November 15 E0/E1 replay from canonical `main` reproduced the exact original
+E1 coefficient vector, covariance, p-values, confidence intervals, source
+hashes and analysis-frame hash. Publication-level claims remain **DIRECTOR REVIEW**,
 not “all robustness passed.” Prior literature, causal targeting, time
 misalignment between approvals and commitments, eventual implementation,
 and joint location exposure must be interpreted by Eric and Matías before
 deciding the manuscript's contribution. No author/venue/outreach agreement
-has been made. The local SciPy/NumPy warning and full upstream CI are not
-yet resolved; a reproducible environment should be pinned before sharing
-code externally.
+has been made. The original local Python 3.10 environment retains a SciPy/NumPy warning;
+**the full GitHub repository CI passed on Python 3.12 for merged PR #29**.
+For byte-identical future reruns, preserve the accepted source/version locks,
+check output hashes, and maintain a compatible/pinned environment.
 
 ## Integrated reproducibility and archived result index
 The canonical harness's W5 modules and synthetic tests are maintained alongside other
