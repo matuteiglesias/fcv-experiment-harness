@@ -1,0 +1,162 @@
+{
+  "date": "2026-11-15",
+  "experiment": "W5 E0-E4",
+  "influence": {
+    "delete_nigeria_south_sudan_sudan": {
+      "ci95_lower": -0.020193657581153095,
+      "ci95_upper": 0.03393416645377113,
+      "countries": 44,
+      "estimate": 0.006870254436309018,
+      "nobs": 38640,
+      "outcome": "any_vac_next",
+      "p_value_two_sided": 0.61131007654365,
+      "removed_countries": "NGA,SSD,SDN",
+      "removed_rows": 6300,
+      "scenario": "cumulative_top_3",
+      "se_country_cluster": 0.013419951788411377
+    },
+    "donor_geo_source": "Asymmetric WB location-confidence and CN polygon-single-area restrictions can reverse incidence sign while changing exposure support; do not compare as like-for-like quality.",
+    "event_reconstruction": {
+      "eligible_matched_W5_outcome_rows": 26963,
+      "fatalities_gold": 91396.0,
+      "status": "PASS_EVENT_TO_CERTIFIED_GOLD_EXACT_CELL_PARITY"
+    },
+    "fatality_event_tail": "Deleting top 1% of positive-fatality source events removes 31.2% of fatalities and reverses OLS fatality point-estimate sign; diagnostic only, not data correction.",
+    "history": "Prior-recorded donor source flags did not yield a significant donor contrast; left censored.",
+    "leave_one_country_out": {
+      "any_vac_next": {
+        "leave_one_country_max_estimate": 0.01394794953559769,
+        "leave_one_country_min_estimate": 0.0013233667232082965,
+        "leave_one_country_p_0p05_status_change": [],
+        "leave_one_country_sign_flip": []
+      },
+      "vac_fatalities_next": {
+        "leave_one_country_max_estimate": 0.9184956680643304,
+        "leave_one_country_min_estimate": 0.32083309053227,
+        "leave_one_country_p_0p05_status_change": [],
+        "leave_one_country_sign_flip": []
+      }
+    },
+    "outcome_geo_precision": "Incidence contrast remains positive and statistically inconclusive with ACLED geo_precision 1 or 1–2"
+  },
+  "primary": {
+    "country_clusters": 47,
+    "estimand": "difference in adjusted observational association: China-only minus World-Bank-only",
+    "model": "ADM2 FE, country-financing-period FE, country-cluster CR1 t(G-1)",
+    "nobs": 44940,
+    "outcome": "next-biennium binary VAC incidence",
+    "source_exclusive_contrast": {
+      "ci95_percentage_points_lower": -1.6992785320426407,
+      "ci95_percentage_points_upper": 3.0116900197206653,
+      "estimate_percentage_points": 0.6562057438390122,
+      "p_value_two_sided": 0.5776789965087252,
+      "se_probability": 0.011701969448330608
+    },
+    "vs_neither": {
+      "both_vs_neither_recorded": {
+        "ci95_percentage_points_lower": -1.2232301744565066,
+        "ci95_percentage_points_upper": 4.625539459347444,
+        "estimate_percentage_points": 1.7011546424454689,
+        "p_value_two_sided": 0.24765746347206433
+      },
+      "china_only_vs_neither_recorded": {
+        "ci95_percentage_points_lower": -1.86614491921704,
+        "ci95_percentage_points_upper": 0.5443755981791767,
+        "estimate_percentage_points": -0.6608846605189318,
+        "p_value_two_sided": 0.2754472616338839
+      },
+      "wb_only_vs_neither_recorded": {
+        "ci95_percentage_points_lower": -3.570752473720103,
+        "ci95_percentage_points_upper": 0.9365716650042152,
+        "estimate_percentage_points": -1.317090404357944,
+        "p_value_two_sided": 0.24549462731117164
+      }
+    }
+  },
+  "provenance": {
+    "accepted_analysis_frame_sha256": "89cd029cbb54acdb0d5020449a00facc79a6d84b162ece41faad1904423cd17b",
+    "acled_certified_sha256": "bffb63a924253255574aa3d84c090a1c7246cfad527f91fecfbed3b5f2d445f8",
+    "acled_source_id": "acled-local-africa-1997-2021-sep24-06d043a5f3d9--geo-70d8aab67f95--T2_y2001--cert-b7c87b27e221",
+    "additional_source_sha256": {
+      "silver_events": "df40b89e7c8514ab5e8edd42ee331191e541447f802635dfa8517ee62bef45bf",
+      "silver_geography": "90f649f2f818b64b2b47a809f2226b5527030aa32304618e63ae0100be611d4e",
+      "silver_period": "e64cabd378921b8d2f6e811ce5e2f782918cc3a2ee2fdc4e474877c11aefbe33",
+      "source_project_roster": "9208e1b208315c23dc5611baf950dc1b4cfd2e3bb5943bf1cf2932aa57a411be"
+    },
+    "e4_spec_sha256": "038f2b41008047cdc72237eade6831be8e7175f2ce031696508c4f6aa62c5eac",
+    "investment_sha256": "8599d946932965c822923c80d7aea6656a8af78dfcecbdb73931fe406cad32a3",
+    "investment_source_id": "aiddata-cn-wb-source-v1-558e6e093aca5e5c",
+    "location": "Private source/data/result files are not redistributed in Git; rerun or compare files to the recorded hashes. See W5_CN_WB_VAC.md",
+    "private_result_receipt_sha256": {
+      "e0_preflight.json": "8eb75c35e8d9325cbc59cbed584bcd6a637572383d0fab486a488f94f75f0019",
+      "e1_primary.json": "2159b11a3ba655f43daf008749d80267726e1ff9903197421ecdfe56dec48e24",
+      "e2_results.json": "ae0a6b2e0ccca50663345943f116c6f73d5459ed74e1e4effcc6c9c2b75d0975",
+      "e3_results.json": "13fe47dec87bf6916fd82cfb46821840d44d545ccb4027577cdfb7ce2a592edb",
+      "e4_acled_outcome_precision_effects.csv": "8dc824d9b10d783b90662c576e068c69c7efdecb959ebc6449c188365c75b0cb",
+      "e4_acled_outcome_precision_results.json": "4282931db3394f0e7931d0c4e9d556844fa2db1acf3739daa49ba813dfa9a059",
+      "e4_country_fatality_ranking.csv": "d812dc3b09a583e5d6ccd6b5d086bb8a13aa696fec06381f25e0bf1ee10740c3",
+      "e4_country_leaveout_effects.csv": "b15c0ceb2140f6db27b67190862dd740742ede6c1f3078c7010fce1321be8161",
+      "e4_event_influence_effects.csv": "efe29b29165cd506d36d040f6866ac65aa65071ec7516ca1b55b2cdfc103c33c",
+      "e4_history_adjusted_effects.csv": "97a59971f46b844e48ffe47818e6e141025c3a491a704276a4de167ac26b1501",
+      "e4_results.json": "837813c15c3b14f5a194c36fafb71dbe3a22d33f1414ca6280796e35bd48d7a0",
+      "e4_source_precision_effects.csv": "a5f0389c09b56922c7a9e64b7a0e4e512c93b7f16b2949ebcc14ed2e6c6fa778",
+      "e4_top_source_events.csv": "45df2b819c33330c8ccd0417b7aae714d7ab2f6314d6c0a0a699aca6ca5344fa",
+      "run_receipt.json": "126d4f59891a98f711e350229e77e8d631e46a3c6a93146f98b91b5d0a06594b",
+      "w5_analysis_frame.parquet": "89cd029cbb54acdb0d5020449a00facc79a6d84b162ece41faad1904423cd17b"
+    },
+    "w5_original_commits": [
+      "84edbe2",
+      "830b085",
+      "e78183dba51f"
+    ]
+  },
+  "sample": {
+    "countries": 47,
+    "geographies": 6420,
+    "periods": 7,
+    "rows": 44940,
+    "source_arms": {
+      "both": 1302,
+      "china_only": 7183,
+      "neither_recorded": 32783,
+      "wb_only": 3672
+    }
+  },
+  "schema": "fcv.w5.public_aggregate_result_index.v1",
+  "scientific_claim_limit": "No causal identification, no equivalence finding; geographic source definitions asymmetric; fatality tail sensitive",
+  "secondary": {
+    "fatalities_ols": {
+      "ci95_lower": -0.726079804516037,
+      "ci95_upper": 1.8273790200920381,
+      "estimate": 0.5506496077880005,
+      "p_value_two_sided": 0.3898158145654057
+    },
+    "ppml_warning": "Filtered conditional FE samples; not equivalent to full E1 sample.",
+    "vac_event_count_ppml": {
+      "p_value_two_sided": 0.43092252745069315,
+      "rate_ratio": 1.1336147287489093,
+      "rate_ratio_ci95_lower": 0.8249701728357791,
+      "rate_ratio_ci95_upper": 1.5577318981352741
+    },
+    "vac_fatality_count_ppml": {
+      "p_value_two_sided": 0.1791115650434094,
+      "rate_ratio": 1.4681585855808403,
+      "rate_ratio_ci95_lower": 0.8330134952546269,
+      "rate_ratio_ci95_upper": 2.5875806871002323
+    }
+  },
+  "status": "COMPLETED_OBSERVATIONAL_WITH_MEASUREMENT_FRAGILITY",
+  "study": "China-only vs World-Bank-only recorded financing and next-biennium ACLED violence against civilians, ADM2 Africa",
+  "timing": {
+    "causal_att_identified": false,
+    "cohort_areas": 6550,
+    "country_cohort_cells": 61,
+    "left_censored": true
+  },
+  "verification": {
+    "canonical_eligible": "No source rows, unique event IDs, coordinates or private data in this result index.",
+    "event_to_gold_parity": "PASS",
+    "full_ci_at_initial_analysis": "NOT_YET_RUN",
+    "w5_synthetic_tests_passed": 16
+  }
+}

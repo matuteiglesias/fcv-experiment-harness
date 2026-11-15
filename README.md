@@ -10,6 +10,23 @@ The project separates:
 
 The governing rule is simple: weak or failed gates are information about the instrument/design, not an invitation to search the specification grid for a better coefficient.
 
+## W5 — integrated China × World Bank VAC experiment (November 2026)
+
+The harness includes the complete optional W5 E0–E4 workflow: source-locked
+AidData donor comparison, ADM2×biennium VAC outcomes, fixed-effects inference,
+selection diagnostics, country/event influence, and measurement sensitivities.
+See [W5_CN_WB_VAC.md](W5_CN_WB_VAC.md) for inputs, runnable commands, exact
+historical results, validation gates, and limitations. A compact, machine-readable
+[2026-11-15 result index](docs/results/w5_china_wb_vac_20261115.json) is
+versioned with the harness, including primary estimates, scientific caveats,
+input and private-result SHA-256 references. Raw/source event-level data and
+full empirical result files are intentionally **not** distributed in Git.
+
+W5 operates on a **distinct, source-certified panel** from the legacy 2023
+DHSGC canonical experiment and the China-only E2 calibration; this is a
+dataset/estimand boundary, **not** a separate repository, isolated branch,
+or competing experimental framework. Tests run in the normal harness CI.
+
 ## Current real-data architecture
 
 The recovered 2023 work contains multiple empirical surfaces that share a `GID × TimePeriod` system. The harness now treats them explicitly as separate inherited objects:
