@@ -1,6 +1,6 @@
 # W5: China/World Bank financing decisions and next-biennium civilian violence
 
-**Status: E0 PASS; E1 exploratory fit reproduced independently. No causal effect identified.**
+**Status: E0 PASS, E1–E3 estimated; E1 independently reproduced. No causal effect identified.**
 Scientific line: PL-015 / RP-008 (measurement) + RP-009 (inference).
 Design owner: Matías; Eric Mvukiyehe is a prospective collaborator, not a confirmed coauthor.
 Bounded research protocol: `~/.local/share/fcv-china-wb-comparison/W5_PAPER_ECONOMETRIC_PROTOCOL_2026-11-15.md`.
@@ -17,8 +17,8 @@ treatment. The neither-recorded category is not verified never-treated.
 
 Predeclared primary outcome: any ACLED violence-against-civilians event in the
 **next** two-year bin. Secondary planned outcomes: number of VAC events,
-fatality levels, and fatalities/event counts under FE PPML. Dynamic pre-trend
-diagnostics, source precision, histories and country influence are not yet run.
+fatality levels, and fatalities/event counts under FE PPML. Pre-period selection diagnostics and source-first cohort comparisons have now run
+in E3. Source precision and leave-country influence remain E4 and are NOT run.
 
 ## Input provenance / fail-closed contract
 - `config/w5_china_wb_vac_v1.json` freezes the exact two input SHA-256 hashes,
@@ -100,11 +100,74 @@ environment should be refreshed prior to external release.
 - `e1_independent_sparse_check.json` — alternative numerical estimator receipt.
 - `run_receipt.json` — exact source/contract/config/frame hashes.
 
+## E2 — severity and frequency (completed 2026-11-15)
+Run `python3 -m fcv_harness.w5_e2_e3_cli --phase e2` with the same
+`--spec --investment --acled --out-dir` arguments as E1 above. E2 requires
+the verified E0/E1 frame receipt and exact source hashes before estimating.
+- Next VAC fatalities, FE OLS: CN-only − WB-only **+0.55065 fatalities**,
+  country-clustered SE 0.63428, CI95 [−0.72608, +1.82738], p=.3898
+  (full 44,940 rows).
+- VAC events, FE Poisson pseudolikelihood: **ratio 1.1336**,
+  CI95 [0.8250, 1.5577], p=.4309; **15,309** retained observations,
+  **46** country clusters.
+- VAC fatalities, FE Poisson pseudolikelihood: **ratio 1.4682**,
+  CI95 [0.8330, 2.5876], p=.1791; **11,121** observations,
+  **46** country clusters.
+- PPML iterative removal of all-zero dependent-variable ADM2 and
+  country-period FE groups is *explicit*: 29,631 event-count rows and
+  33,819 fatality-count rows dropped. PPML therefore describes a different
+  finite-FE/outcome-support sample and is not full-sample E1 replication.
+- Recorded fatalities are concentrated: top 1% of area-period cells
+  account for **80.2%** of fatalities; top three countries (NGA/SSD/SDN)
+  **57.7%**. E4 influence checks remain necessary.
+
+The PPML code uses concentrated FE iterated proportional fitting and
+weighted FWL/Newton scoring, country-cluster sandwich uncertainty and
+convergence diagnostics, not an unexamined dense dummy fit. Synthetic
+W5 acceptance tests independently confirm its coefficients match a
+**full-rank** dummy-variable Poisson GLM on a separate test dataset.
+
+## E3 — timing and source-placement diagnostics (completed 2026-11-15)
+Run `python3 -m fcv_harness.w5_e2_e3_cli --phase e3` with the same
+four required input/output arguments. E3 reads the accepted W5 frame
+and exact certified ACLED data for outcome (t−2) and confirms full
+coverage. Full-sample CN−WB prior-incidence contrasts (country-cluster):
+- (t−2): +1.145 pp (p=.224);
+- (t−1): +0.090 pp (p=.899);
+- prior difference (t−1 - t−2): −1.055 pp (p=.323).
+
+Source-first risk set: exclude **1,247 areas** already source-financed in
+the first observed 2001–02 period, acknowledging left censoring. Of
+the remaining eligible rows, 61 country-financing-period cohorts in 27
+countries have CN-first, WB-first and as-of-t no-source comparisons:
+6,550 area-cohort rows (1,127 CN-first; 605 WB-first; 117 both-first;
+4,701 as-of-t source-unexposed, possibly reused at later cohorts).
+- pre-change (A_{t-1}-A_{t-2}): CN-first−WB-first −1.118 pp,
+  CI95 [−5.863, +3.627], p=.632.
+- post-change (A_{t+1}-A_{t-1}): +0.376 pp,
+  CI95 [−3.669, +4.421], p=.850.
+
+The risk-set compares observed source decisions, *not randomized or
+irreversible implementations*. Country-cohort FE and country clustering
+do not eliminate unobserved local targeting. No future financing is
+used to eliminate eligible contemporaneous controls; repeated controls
+can finance later. Pretrend nonrejection does not establish balance
+or a causal ATT.
+
+An independent real-data check re-fits the 6,550-row matched first-recorded
+risk set using statsmodels country×cohort explicit-dummy OLS and the
+country-cluster sandwich. Both pre- and post-change coefficients/SE
+reproduce to better than 1e−15. Receipt:
+`e3_independent_matched_check.json`. This is numerical validation,
+**not** a causal assignment or pre-trend validation.
+
+Run outputs are `e2_results.json`, `e2_model_effects.csv`,
+`e3_results.json`, `e3_preperiod_effects.csv`,
+`e3_first_recorded_effects.csv`, and the cohort support CSV.
+Provenance and model limit documentation is in both phase JSON receipts.
+
 ## Next gates
-E2: fatalities FE OLS and event/fatality FE PPML with separation and sample
-changes; no retroactive choice of the primary outcome. E3: pre-period
-selection/first-recorded exposure diagnostics. E4: project-geography precision,
-country concentration and exposure-history sensitivity. Scientific sign-off
+E0–E3 complete. E4: project-geography precision, country concentration, leave-country-out influence and exposure-history sensitivity. Scientific sign-off
 and an explicit material-effect threshold are needed before statements of
 causality or equivalence. No actor-specific VAC or employment-sector
 classification in this lane until source prerequisites are met.
