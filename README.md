@@ -10,6 +10,14 @@ The project separates:
 
 The governing rule is simple: weak or failed gates are information about the instrument/design, not an invitation to search the specification grid for a better coefficient.
 
+## W5 — source-harmonized China × World Bank VAC study (November 2026)
+
+See [W5_CN_WB_VAC.md](W5_CN_WB_VAC.md) for the source-locked ADM2×biennium
+four-arm comparison, local E0/E1 reproducibility commands, and explicitly
+noncausal interpretation. This **exploratory scientific lane** is separate
+from the inherited 2023 canonical panel and from the China-only E2 reference
+calibration. Its source data and result files are **not stored in Git**.
+
 ## Current real-data architecture
 
 The recovered 2023 work contains multiple empirical surfaces that share a `GID × TimePeriod` system. The harness now treats them explicitly as separate inherited objects:
