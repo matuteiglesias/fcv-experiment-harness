@@ -1,6 +1,6 @@
 # W5: China/World Bank financing decisions and next-biennium civilian violence
 
-**Status: E0 PASS, E1–E3 estimated; E1 independently reproduced. No causal effect identified.**
+**Status: E0 PASS, E1–E4 executed; targeted numerical checks pass. Observational, noncausal.**
 Scientific line: PL-015 / RP-008 (measurement) + RP-009 (inference).
 Design owner: Matías; Eric Mvukiyehe is a prospective collaborator, not a confirmed coauthor.
 Bounded research protocol: `~/.local/share/fcv-china-wb-comparison/W5_PAPER_ECONOMETRIC_PROTOCOL_2026-11-15.md`.
@@ -166,8 +166,134 @@ Run outputs are `e2_results.json`, `e2_model_effects.csv`,
 `e3_first_recorded_effects.csv`, and the cohort support CSV.
 Provenance and model limit documentation is in both phase JSON receipts.
 
-## Next gates
-E0–E3 complete. E4: project-geography precision, country concentration, leave-country-out influence and exposure-history sensitivity. Scientific sign-off
-and an explicit material-effect threshold are needed before statements of
-causality or equivalence. No actor-specific VAC or employment-sector
-classification in this lane until source prerequisites are met.
+## E4 — influence, event-level source parity, geographic precision (completed 2026-11-15)
+
+**Purpose:** Test *all* planned exclusions and transparently report sign and
+confidence-interval changes, rather than choose exclusions to improve p-values.
+All 47 leave-one-country-out fits, four cumulative high-fatality-country
+deletions (top 1/2/3/5), four *individual-event* deletions, three
+asymmetric financing-location precision definitions, observed source-history
+controls, and two common outcome-source ACLED geo-precision filters are run.
+Nothing is deleted or changed in certified Gold/Silver or input sources.
+
+### Country influence: same FE model and country-cluster CR1
+Original CN-only − WB-only: +0.6562 **pp** any VAC incidence (p=.578);
++0.55065 **fatalities/ADM2×biennium** (p=.390).
+Across **all 47 single-country omissions**:
+- incidence difference remains positive in **[+0.132, +1.395] pp**;
+  no single omission crosses p=.05 or reverses sign;
+- fatality coefficient remains positive in **[+0.321, +0.918] fatalities**;
+  no single omission crosses p=.05 or reverses sign.
+Largest perturbation to incidence is from Uganda (leave out UGA:
++1.395 pp, p=.143), not Nigeria.
+
+By cumulative exclusion of countries with the most recorded VAC fatalities:
+| Source countries omitted | VAC incidence difference (pp) | Fatality difference (level) |
+|---|---:|---:|
+| Nigeria | +0.847 | +0.321 |
+| Nigeria + South Sudan | +0.869 | +0.120 |
+| Nigeria + South Sudan + Sudan | +0.687 | **+0.057** |
+| The above + DR Congo + CAR | +0.559 | +0.161 |
+
+No selected country deletion establishes a statistically discernible donor
+difference. However, **severity magnitude changes substantially**: the
+three-country removal cuts the unadjusted-to-crisis-influence fatality
+coefficient by ~90%. Source-country deletion is a robustness stress, not an
+inference that conflict in those countries was recorded incorrectly.
+
+### Actual source-event influence, certified ACLED parity before deletion
+ACLED Silver events + `event_geography` matched_unique assignments +
+`event_period` assigned periods reconstructed EXACTLY **26,963 VAC events
+and 91,396 reported VAC fatalities** in the full W5 t+1 outcome periods,
+including zero-positive cells. Exact event-count and fatality parity across
+all 44,940 ADM2×financing-period rows passed. Eligible source events have
+immutable event_row_id, date, source event ID, reported fatalities and
+precision; no aggregation method was redefined post hoc.
+
+**Individual event deletion** affects only the specific areas/biennia, not
+countries. Events ranked by **reported fatalities descending**, tied by
+event-row ID, independently of the donor coefficient. Separate copies:
+| Deleted source event rows | Share of fatalities dropped | Incidence contrast (pp) | Fatality contrast (level) |
+|---|---:|---:|---:|
+| largest one (1,000 reported fatalities, Nigeria) | 1.1% | +0.654 | +0.526 |
+| top 5 | 4.0% | +0.654 | +0.693 |
+| top 10 | 7.2% | +0.654 | +0.829 |
+| top 1% of positive-fatality event rows (132 events) | 31.2% | +0.672 | **−0.045** |
+
+All remain statistically inconclusive. The fatality coefficient can reverse
+*sign* under deletion of ~31% of recorded fatality mass, despite no single
+extreme event changing its interpretation. **This is a sensitivity, not a
+justification to censor valid extreme events.** `e4_top_source_events.csv`
+and the JSON experiment manifest document the original top event IDs.
+ACLED's reporting/precision is not independently audited beyond source parity.
+
+### Geographic uncertainty: two different domains, do not conflate
+**Outcome-side ACLED geo precision**, applied uniformly to Chinese, WB,
+joint and neither source categories:
+- only ACLED geo_precision 1 or 2: n=25,727 VAC events, incidence +0.649 pp
+  (p=.579), fatalities +0.534 (p=.332);
+- only ACLED geo_precision 1: n=19,294 events, incidence **+0.384 pp**
+  (p=.705), fatalities **+0.419** (p=.377), 66.1% fatality mass retained.
+The full 44,940-row lattice and original financing categories are retained
+in both cases. Missing events are *structural zeros only for these deliberately
+restricted outcome definitions*, with original certified event parity checked.
+
+**Financing-side source-location confidence** is asymmetrically measured:
+WB `exact_named_place|verified_adm2` versus China geometry `matched_single`
+(or broad source geometry, often matched_multiple due polygon coverage).
+Restricting WB to high-confidence location source records leaves broad China:
+incidence contrast **+1.499 pp**, p=.135. Restricting China to single-ADM2
+geometry and leaving broad WB: incidence **−3.820 pp**, p=.130. Both strict:
+**−3.139 pp**, p=.201. These filters cause strong changes in exposure
+support (CN-only falls from 7,183 to ~427/451 in China-strict scenarios);
+CN matched_multiple is not necessarily *lower spatial precision* than
+matched_single, so **this is NOT a symmetric precision comparison and does
+not prove the primary inference robust to equivalent geocoding quality**.
+The source roster reconstructs BOTH Gold project counts with zero mismatches.
+
+### Financing history within the observed period
+Adding separate prior-recorded CN/WB source indicators to the main
+area + country-period FE regression (without future-financing selection):
+- Incidence contrast **+0.780 pp**, p=.497.
+- Fatality-level contrast **+1.123**, p=.222.
+The histories are necessarily left-censored before the 2001–02 panel start.
+
+### Acceptance criteria and scientific status
+This E4 is **COMPLETED WITH EXPLICIT FRAGILITY**, not “fully robust”.
+The incidence result resists each country deletion, individual event stress
+and common ACLED precision definition. The severity coefficient is fragile
+in magnitude and its sign reverses under extreme-tail trimming; the financing
+location-restricted estimates differ sharply under asymmetric source rules.
+None establishes equivalence, causal effects, or a robust difference.
+Do not pick the model with the smallest p-value. Never present these
+deletions as removal of bad/confounded data. E4 is a descriptive study of
+estimator sensitivity, not an identification strategy.
+
+Re-run E4 using the source-locked accepted frame with:
+`python -m fcv_harness.w5_e4_cli --spec config/w5_china_wb_vac_v1.json
+--e4-spec config/w5_e4_influence_v1.json --investment "$INV" --acled "$AC"
+--roster "$D/gold/investments/aiddata_china_wb_source_panel/aiddata-cn-wb-source-v1-558e6e093aca5e5c/source_project_roster.parquet"
+--event-silver <ACLED_SILVER_EVENTS> --event-geo <ACLED_EVENT_GEOGRAPHY>
+--event-period <ACLED_EVENT_PERIOD> --out-dir "$OUT"`.
+The independent outcome-side ACLED precision CLI uses the same source
+`--spec --investment --acled --event-silver --event-geo --event-period --out-dir`.
+The exact paths/hashes of all extra sources are recorded in result receipts.
+
+Outputs: `e4_results.json`,
+`e4_country_leaveout_effects.csv`, `e4_event_influence_effects.csv`,
+`e4_top_source_events.csv`, `e4_country_fatality_ranking.csv`,
+`e4_source_precision_effects.csv`, `e4_history_adjusted_effects.csv`,
+`e4_acled_outcome_precision_effects.csv`,
+`e4_acled_outcome_precision_results.json`.
+Source Gold remains unchanged. Reruns must preserve all declared
+exclusions and include every p-value and confidence interval.
+
+## Scientific gate
+E0–E4 are executed. Publication-level claims remain **DIRECTOR REVIEW**,
+not “all robustness passed.” Prior literature, causal targeting, time
+misalignment between approvals and commitments, eventual implementation,
+and joint location exposure must be interpreted by Eric and Matías before
+deciding the manuscript's contribution. No author/venue/outreach agreement
+has been made. The local SciPy/NumPy warning and full upstream CI are not
+yet resolved; a reproducible environment should be pinned before sharing
+code externally.

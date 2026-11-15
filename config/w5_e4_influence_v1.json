@@ -1,0 +1,23 @@
+{
+  "schema": "fcv.w5.e4.influence.v1",
+  "role": "pre_exclusion_influence_audit_not_pvalue_selection",
+  "source_spec": "config/w5_china_wb_vac_v1.json",
+  "primary_outcome": "any_vac_next",
+  "secondary_outcome": "vac_fatalities_next",
+  "cluster": "country_iso3",
+  "fixed_effects": ["geo_uid", "country_period"],
+  "country_deletions": "leave_each_of_47_countries_out_and_top_fatality_cumulative",
+  "top_fatality_country_cumulative_sizes": [1,2,3,5],
+  "event_deletions": ["top_1", "top_5", "top_10", "top_1pct_positive_fatality_events"],
+  "event_ranking": "descending_recorded_fatalities_tie_by_event_row_id",
+  "event_source_contract": "silver_ACLED_events_join_matched_unique_geography_assigned_period_and_exact_parity_with_certified_gold",
+  "geography_filters": [
+    "wb_high_confidence_only_china_broad",
+    "china_single_ADM2_assignment_only_wb_broad",
+    "wb_high_confidence_and_china_single_assignment"
+  ],
+  "exposure_history": "prior_CN_and_prior_WB_record_flags_as_additional_time_varying_covariates",
+  "inference": "country_CR1_t_distribution",
+  "status_categories": ["PASS_NUMERICALLY", "FRAGILE_SIGN_OR_INFERENCE", "UNRESOLVED_GEO_SEMANTICS", "HOLD_SOURCE_PARITY"],
+  "interpretation": "descriptive sensitivity only; delete events/countries only as stress tests not correction of source facts"
+}
