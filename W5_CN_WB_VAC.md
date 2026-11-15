@@ -1,10 +1,10 @@
 # W5: China/World Bank financing decisions and next-biennium civilian violence
 
-**Status: E0 PASS, E1–E4 executed; targeted numerical checks pass. Observational, noncausal.**
+**Status: E0–E4 completed 2026-11-15; 16 targeted W5 synthetic tests pass. Observational and noncausal; primary findings require scientific review.**
 Scientific line: PL-015 / RP-008 (measurement) + RP-009 (inference).
 Design owner: Matías; Eric Mvukiyehe is a prospective collaborator, not a confirmed coauthor.
-Bounded research protocol: `~/.local/share/fcv-china-wb-comparison/W5_PAPER_ECONOMETRIC_PROTOCOL_2026-11-15.md`.
-The primary result should not be included in a public manuscript or an external email without scientific review.
+Versioned source and estimator contracts: `config/w5_china_wb_vac_v1.json` and `config/w5_e4_influence_v1.json`. Original detailed protocol archived locally as `~/.local/share/fcv-china-wb-comparison/W5_PAPER_ECONOMETRIC_PROTOCOL_2026-11-15.md` (not needed to execute the documented commands).
+The primary result was communicated to Eric with caveats on 2026-11-15; public/causal manuscript claims and any new identification strategy still require scientific review.
 
 ## What is new versus prior harness lanes?
 This lane is **not** the 2023 DHSGC-restricted canonical panel, and not the
@@ -18,7 +18,7 @@ treatment. The neither-recorded category is not verified never-treated.
 Predeclared primary outcome: any ACLED violence-against-civilians event in the
 **next** two-year bin. Secondary planned outcomes: number of VAC events,
 fatality levels, and fatalities/event counts under FE PPML. Pre-period selection diagnostics and source-first cohort comparisons have now run
-in E3. Source precision and leave-country influence remain E4 and are NOT run.
+in E3. Country influence, original ACLED event-level tests, and geographic precision sensitivities were executed in E4.
 
 ## Input provenance / fail-closed contract
 - `config/w5_china_wb_vac_v1.json` freezes the exact two input SHA-256 hashes,
@@ -34,7 +34,7 @@ in E3. Source precision and leave-country influence remain E4 and are NOT run.
 Example on Matías's local computer:
 
 ```bash
-cd ~/repos/fcv-experiment-harness-w5
+cd ~/repos/fcv-experiment-harness
 export PYTHONPATH=~/repos/spatial-data-foundation/src:${PYTHONPATH:-}
 export D=/media/matias/Elements1/fcv-empirical-data
 
@@ -297,3 +297,26 @@ deciding the manuscript's contribution. No author/venue/outreach agreement
 has been made. The local SciPy/NumPy warning and full upstream CI are not
 yet resolved; a reproducible environment should be pinned before sharing
 code externally.
+
+## Integrated reproducibility and archived result index
+The canonical harness's W5 modules and synthetic tests are maintained alongside other
+experiments; they are not a throwaway worktree. The checked-in aggregate
+[2026-11-15 result index](docs/results/w5_china_wb_vac_20261115.json)
+records the historic effect sizes, uncertainty, 47-country influence summary,
+source-precision/terminal-tail warnings, validated event-to-Gold parity, exact
+source SHA-256 locks, and hashes of the richer private result files. This index
+contains **no raw ACLED event records**, geographic assignments, identifiable
+row-level data, or source extracts. It is evidence of a particular run, not a
+CI synthetic fixture or a newly identified causal treatment effect.
+
+To recreate the same figures, obtain **exactly the recorded source versions**,
+run E0 then E1 (then E2/E3 and the independent E4 commands) with the documented
+inputs and coverage contracts, and compare `run_receipt.json` and the E0–E4
+output SHA-256 digests to the archived index. Reruns with updated software or
+sources may change numerical bytes; don't silently replace this historic index.
+If private data are unavailable, execute all W5 synthetic tests and inspect
+the published index, but do **not** claim that synthetic tests reproduce the
+empirical coefficients. The complete event-level and project roster inputs must
+be provisioned locally and remain outside Git. The exact output receipts live in
+`/media/matias/Elements1/fcv-empirical-data/runs/fcv-experiment-harness/w5-cn-wb-vac-20261115/`
+on the original authorized machine.

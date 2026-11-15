@@ -10,13 +10,22 @@ The project separates:
 
 The governing rule is simple: weak or failed gates are information about the instrument/design, not an invitation to search the specification grid for a better coefficient.
 
-## W5 — source-harmonized China × World Bank VAC study (November 2026)
+## W5 — integrated China × World Bank VAC experiment (November 2026)
 
-See [W5_CN_WB_VAC.md](W5_CN_WB_VAC.md) for the source-locked ADM2×biennium
-four-arm comparison, local E0/E1 reproducibility commands, and explicitly
-noncausal interpretation. This **exploratory scientific lane** is separate
-from the inherited 2023 canonical panel and from the China-only E2 reference
-calibration. Its source data and result files are **not stored in Git**.
+The harness includes the complete optional W5 E0–E4 workflow: source-locked
+AidData donor comparison, ADM2×biennium VAC outcomes, fixed-effects inference,
+selection diagnostics, country/event influence, and measurement sensitivities.
+See [W5_CN_WB_VAC.md](W5_CN_WB_VAC.md) for inputs, runnable commands, exact
+historical results, validation gates, and limitations. A compact, machine-readable
+[2026-11-15 result index](docs/results/w5_china_wb_vac_20261115.json) is
+versioned with the harness, including primary estimates, scientific caveats,
+input and private-result SHA-256 references. Raw/source event-level data and
+full empirical result files are intentionally **not** distributed in Git.
+
+W5 operates on a **distinct, source-certified panel** from the legacy 2023
+DHSGC canonical experiment and the China-only E2 calibration; this is a
+dataset/estimand boundary, **not** a separate repository, isolated branch,
+or competing experimental framework. Tests run in the normal harness CI.
 
 ## Current real-data architecture
 
