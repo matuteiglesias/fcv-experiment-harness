@@ -39,6 +39,20 @@ geographic mismatches are retained for W5 parity and separately flagged.
 Five synthetic structural tests run in standard CI. Real project-level
 derived data stay outside Git with source/output SHA-256 receipts.
 
+## W7 — managed employment classifications and scientific gate (November 2026)
+
+[W7 classification control](docs/experiments/W7_CLASSIFICATION_CONTROL.md)
+provides one versioned project-level classification ledger over the full 2,535
+China and World Bank projects and an exact project→ADM2×biennium exposure
+propagation to the unchanged 44,940-cell W5 panel. Its [native-sector crosswalk](config/w7_native_sector_channels_v0.json)
+is **candidate-mechanism metadata**, not observed employment or wages.
+The first deterministic real-data release passes cardinality, donor-count
+conservation and geographic consistency checks, but has **0 reviewed projects**
+and explicitly **prohibits jobs-versus-other inference**. A reviewer must attach
+source-qualified evidence and direct/indirect/local-implementation labels before
+the scientific contrast can even be screened. W7 tests and the separate
+VAC scale audit now run in harness CI; private row-level data remain off Git.
+
 ## Current real-data architecture
 
 The recovered 2023 work contains multiple empirical surfaces that share a `GID × TimePeriod` system. The harness now treats them explicitly as separate inherited objects:
