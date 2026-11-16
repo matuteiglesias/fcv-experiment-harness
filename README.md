@@ -59,6 +59,9 @@ The [outcome-blind frozen policy](config/w7_exploratory_jobs_proxy_v0.json),
 [bounded 100-project nested quality audit](docs/experiments/W7_FROZEN_PROXY_EXPERIMENT_V0.md),
 and [qualified empirical results](docs/experiments/W7_FROZEN_PROXY_RESULTS_20261116.md)
 record a completed, deterministic broad/narrow sector-channel experiment.
+For interpretation and population denominators see the [scientific synthesis](docs/experiments/W7_ESTIMANDS_POPULATIONS_AND_NULLS_20261116.md),
+[discussion brief](docs/experiments/W7_ERIC_DISCUSSION_BRIEF_20261116.md),
+and [eight-row coefficient export](docs/results/w7_frozen_proxy_contrasts_20261116.csv).
 The native-sector mapping passed all 2,535 project identities; an independent
 nested 10→20→50→100 sample found 0/100 definite mapping errors and 2 semantic
 ambiguities. Full 44,940-cell W5 regressions were inconclusive. World Bank
