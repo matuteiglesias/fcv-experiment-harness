@@ -70,6 +70,22 @@ This is **not a measured employment effect**, and other sectors are not
 verified non-jobs. Research-ready data outputs and receipts remain private
 and source-hashed outside Git; synthetic tests run in the normal CI.
 
+## W8 — ADM2 J/O/N common-support means (November 2026)
+
+The [frozen scientific contract](docs/experiments/W8_ADM2_JON_SCIENTIFIC_DESIGN_V0.md),
+[qualified empirical report](docs/experiments/W8_ADM2_JON_SCIENTIFIC_RESULTS_20261116.md),
+and [18-contrast machine-readable index](docs/results/w8_jon_adm2_matched_contrasts_20261116.csv)
+define the **J/O/N** three-group country×financing-period comparison:
+J = sector-based candidate employment/productivity, O = other-sector,
+N = no source-recorded China/WB investment through that period (within covered
+2001–2014 history). **Shared J-target country-period weights** yield J−N,
+O−N, and J−O = (J−N)−(O−N) on one common matched sample per donor.
+China has 128 complete strata/39 countries; WB only 11 strata/10 countries.
+The large negative China J−O post-period level difference is **already
+present in previous-period VAC**, and is **not** an employment or causal effect.
+The code and tests are canonical; private matched records and hashed release
+receipts remain off Git.
+
 ## Current real-data architecture
 
 The recovered 2023 work contains multiple empirical surfaces that share a `GID × TimePeriod` system. The harness now treats them explicitly as separate inherited objects:

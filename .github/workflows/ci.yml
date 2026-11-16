@@ -83,6 +83,7 @@ jobs:
           python tests_jobs_classification_bridge.py
           python tests_w7_employment_classification.py
           python tests_w7_proxy_experiments.py
+          python tests_w8_jon_common_support.py
           python tests_w7_blind_rule_audit.py
           python -m pytest -q tests/test_w7_vac_scale_audit.py
 
