@@ -1,0 +1,22 @@
+{
+  "schema": "fcv.w6.source_sector_proxy.v0",
+  "role": "unvalidated_screening_proxy_not_editorial_jobs_annotation",
+  "source_contract": "W5 source_project_roster, China GeoGCDF v3.0.1, World Bank Geocoded v1.4.2",
+  "interpretation": {
+    "high": "sector plausibly implies productive/employment-relevant activity; NOT observed jobs",
+    "low": "sector suggests a less immediate employment-production channel; NOT proof of non-jobs",
+    "uncertain": "category is heterogeneous/insufficiently informative, or project combines category types"
+  },
+  "sectors": {
+    "china": {
+      "high": ["TRANSPORT AND STORAGE", "ENERGY", "COMMUNICATIONS", "INDUSTRY, MINING, CONSTRUCTION", "AGRICULTURE, FORESTRY, FISHING", "BUSINESS AND OTHER SERVICES"],
+      "low": ["HEALTH", "GOVERNMENT AND CIVIL SOCIETY", "EMERGENCY RESPONSE", "GENERAL BUDGET SUPPORT", "GENERAL ENVIRONMENTAL PROTECTION", "POPULATION POLICIES/PROGRAMMES AND REPRODUCTIVE HEALTH"],
+      "uncertain": ["EDUCATION", "WATER SUPPLY AND SANITATION", "OTHER SOCIAL INFRASTRUCTURE AND SERVICES", "OTHER MULTISECTOR", "TRADE POLICIES AND REGULATIONS", "DEVELOPMENTAL FOOD AID/FOOD SECURITY ASSISTANCE", "OTHER COMMODITY ASSISTANCE", "RECONSTRUCTION RELIEF AND REHABILITATION", "DISASTER PREVENTION AND PREPAREDNESS"]
+    },
+    "world_bank": {
+      "high": ["Agriculture", "Agriculture, forestry, fishing", "Forestry", "Communications", "Energy generation and supply", "Industry", "Mineral resources and mining", "Transport and storage"],
+      "low": ["Government and civil society, general", "Health", "Health, general", "General environmental protection"],
+      "uncertain": ["Banking and financial services", "Basic education", "Education, level unspecified", "Post-secondary education", "Secondary education", "Other social infrastructure and services", "Other", "Trade policy and regulations", "Water supply and sanitation"]
+    }
+  }
+}

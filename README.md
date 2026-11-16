@@ -27,6 +27,18 @@ DHSGC canonical experiment and the China-only E2 calibration; this is a
 dataset/estimand boundary, **not** a separate repository, isolated branch,
 or competing experimental framework. Tests run in the normal harness CI.
 
+## W6 — project identity and classification-propagation bridge (November 2026)
+
+The [W6 bridge contract](docs/experiments/W6_JOBS_CLASSIFICATION_BRIDGE.md)
+defines project-level labels, a separate project×ADM2×biennium bridge, location
+deduplication and exact source-count conservation on the W5 panel. The
+[native-sector proxy policy](config/w6_sector_proxy_v0.json) is a preliminary
+**screening variable, not a validated direct/indirect jobs annotation**.
+All editorial evidence remains explicitly unannotated; source-country
+geographic mismatches are retained for W5 parity and separately flagged.
+Five synthetic structural tests run in standard CI. Real project-level
+derived data stay outside Git with source/output SHA-256 receipts.
+
 ## Current real-data architecture
 
 The recovered 2023 work contains multiple empirical surfaces that share a `GID × TimePeriod` system. The harness now treats them explicitly as separate inherited objects:
