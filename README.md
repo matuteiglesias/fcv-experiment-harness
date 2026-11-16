@@ -53,6 +53,20 @@ source-qualified evidence and direct/indirect/local-implementation labels before
 the scientific contrast can even be screened. W7 tests and the separate
 VAC scale audit now run in harness CI; private row-level data remain off Git.
 
+## W7 — frozen sector-proxy screen (November 2026)
+
+The [outcome-blind frozen policy](config/w7_exploratory_jobs_proxy_v0.json),
+[bounded 100-project nested quality audit](docs/experiments/W7_FROZEN_PROXY_EXPERIMENT_V0.md),
+and [qualified empirical results](docs/experiments/W7_FROZEN_PROXY_RESULTS_20261116.md)
+record a completed, deterministic broad/narrow sector-channel experiment.
+The native-sector mapping passed all 2,535 project identities; an independent
+nested 10→20→50→100 sample found 0/100 definite mapping errors and 2 semantic
+ambiguities. Full 44,940-cell W5 regressions were inconclusive. World Bank
+broad proxy has thin same-period within-donor support (10 countries, 11 periods).
+This is **not a measured employment effect**, and other sectors are not
+verified non-jobs. Research-ready data outputs and receipts remain private
+and source-hashed outside Git; synthetic tests run in the normal CI.
+
 ## Current real-data architecture
 
 The recovered 2023 work contains multiple empirical surfaces that share a `GID × TimePeriod` system. The harness now treats them explicitly as separate inherited objects:

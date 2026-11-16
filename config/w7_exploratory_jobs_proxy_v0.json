@@ -1,0 +1,92 @@
+{
+  "schema": "fcv.w7.exploratory_jobs_proxy_v0",
+  "frozen_before_model_fit": true,
+  "units": "ADM2-by-financing-biennium 2001-2014, next-biennium VAC",
+  "source_key": [
+    "source_family",
+    "source_release_id",
+    "source_project_id"
+  ],
+  "policies": {
+    "broad": {
+      "positive": [
+        "productive_enterprise",
+        "physical_infrastructure",
+        "skills_education"
+      ],
+      "other": [
+        "health_social",
+        "governance_finance",
+        "humanitarian_environment_other"
+      ]
+    },
+    "narrow": {
+      "positive": [
+        "productive_enterprise",
+        "physical_infrastructure"
+      ],
+      "other": [
+        "skills_education",
+        "health_social",
+        "governance_finance",
+        "humanitarian_environment_other"
+      ]
+    }
+  },
+  "project_rule": "all native sector-channel tags in positive=>candidate; all in other=>other_sector; cross-set=>ambiguous. No verified employment labels.",
+  "cell_rule": "donor-exclusive area-period positive only if all its projects candidates; other only if all other-sector; otherwise mixed. Both donors together is a separate arm; neither recorded is the reference",
+  "regression": {
+    "arms": [
+      "cn_positive_only",
+      "cn_other_only",
+      "cn_mixed_or_unknown",
+      "wb_positive_only",
+      "wb_other_only",
+      "wb_mixed_or_unknown",
+      "both_sources"
+    ],
+    "outcomes": [
+      "any_vac_next",
+      "asinh_vac_events_next",
+      "any_vac_prior"
+    ],
+    "primary": "broad: any_vac_next",
+    "secondary": "narrow: any_vac_next; broad: asinh_vac_events_next",
+    "negative_control": "broad: any_vac_prior",
+    "contrasts": [
+      "cn_positive_only-minus-cn_other_only",
+      "wb_positive_only-minus-wb_other_only"
+    ],
+    "fixed_effects": "ADM2 FE + country x finance-biennium FE",
+    "uncertainty": "CR1 country-clustered; df=country clusters -1",
+    "support_warning": "<100 area-period cells in one comparison arm or <5 countries showing both arms, mark THIN_SUPPORT",
+    "estimand": "observational sector proxy contrast, never actual jobs/wage effect"
+  },
+  "title_signal": {
+    "diagnostic_only": true,
+    "terms": [
+      "employment",
+      "job creation",
+      "jobs",
+      "unemployed",
+      "cash-for-work",
+      "cash for work",
+      "wage subsidy",
+      "labor market",
+      "labour market",
+      "vocational training",
+      "skills training",
+      "income generation",
+      "livelihoods"
+    ],
+    "excluded_false_positive_example": "Ministry of Public Works"
+  },
+  "controls": [
+    "No outcome-informed heuristic edits",
+    "No source edits",
+    "No automatic reviewed class",
+    "Never count WB multi-hot memberships as separate projects",
+    "Hash sources and policy",
+    "No overwrite"
+  ]
+}
