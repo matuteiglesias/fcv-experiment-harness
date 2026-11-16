@@ -1,0 +1,157 @@
+{
+  "schema": "fcv-research-workgraph/v0",
+  "id": "FCV-RG-JOBS-STABILITY-20261116",
+  "title": "Jobs-oriented investment and stability: identification-feasibility assessment",
+  "created_on": "2026-11-16",
+  "state": "QUEUED",
+  "execution_authorized": false,
+  "dispatch_policy": "MANUAL_PULL_ONLY",
+  "scientific_owner": "Amara (Africa Observatory)",
+  "contributors": [
+    "Tomás (data engineering)",
+    "Lucía (spatial measurement)"
+  ],
+  "independent_reviewer": "Ruth",
+  "priority": "NEAR_TERM_NOT_NOW",
+  "parent_evidence": [
+    "W5 donor comparison",
+    "W6 identity bridge",
+    "W7 sector-proxy and label status",
+    "W8 ADM2 J/O/N descriptive comparison"
+  ],
+  "primary_question": "Can existing source-governed FCV data support credible inference on jobs-oriented investments and violence/stability, and if not which measurement/identification bottleneck dominates?",
+  "scientific_target": "J versus genuinely unexposed N as the primary intended contrast; O versus N and J versus O retained as complementary mechanisms and negative-comparison context, not substitutes.",
+  "scientific_boundary": [
+    "W8 J/O/N are sector-composition proxies, not validated jobs, wages, or employment effects.",
+    "W8 country-period standardized levels are not causal ATT/DiD estimates.",
+    "Prior-biennium VAC is not guaranteed pretreatment for J/O with earlier recorded investment.",
+    "N is source-bounded to covered China/WB projects and observed history, not guaranteed no investments.",
+    "Original ADM3 matched-pair/trio deliverable remains distinct from W8 ADM2 descriptive standardization.",
+    "No external communication, outcomes fits, data recoding, task dispatch or estimator promotion authorized by this planning graph."
+  ],
+  "w8_reference_checks": {
+    "china_country_period_strata": 128,
+    "china_countries": 39,
+    "china_contrasts_pp": {
+      "J_minus_N": 0.09,
+      "O_minus_N": 9.64,
+      "J_minus_O": -9.55
+    },
+    "china_previous_J_minus_O_pp": -9.96,
+    "warning": "These are W8 reported descriptive values, not this graph's findings."
+  },
+  "tasks": [
+    {
+      "id": "F00",
+      "name": "Freeze evidence and define target decisions",
+      "owner": "Amara",
+      "depends_on": [],
+      "status": "QUEUED",
+      "deliverable": "Source-locked W5–W8 receipt index, original Eric ADM3 pairs/trios requirements, explicit estimands/decision thresholds, risk register",
+      "acceptance": "Distinguishes sector proxy from validated jobs labels; tracks N purity and left censoring; no historical result reclassified as causal."
+    },
+    {
+      "id": "F01",
+      "name": "Treatment and employment-mechanism audit",
+      "owner": "Amara",
+      "support": [
+        "Tomás"
+      ],
+      "depends_on": [
+        "F00"
+      ],
+      "status": "QUEUED",
+      "deliverable": "Outcome-blind, versioned bounded sample of project records; explicit job-objective versus plausible indirect jobs versus unclassified; project lifecycle/timing data inventory",
+      "acceptance": "Audit sample and sampling frame frozen in advance; evidence references and unknowns retained; no unreviewed project upgraded to verified job creation; stop at bounded pilot."
+    },
+    {
+      "id": "F02",
+      "name": "J–N selection and counterfactual feasibility",
+      "owner": "Amara",
+      "support": [
+        "Ruth"
+      ],
+      "depends_on": [
+        "F00"
+      ],
+      "status": "QUEUED",
+      "deliverable": "Support/overlap and placement diagnostic; first-observed exposure cohorts; previously treated history; prior-outcome trajectory availability; feasible and infeasible identification assumptions",
+      "acceptance": "Reports full and effective independent support, selection covariates available before exposure, multi-period prehistory where identifiable, and a go/no-go for any DiD; matching does not claim to solve unmeasured placement."
+    },
+    {
+      "id": "F03",
+      "name": "Spatial exposure and control contamination",
+      "owner": "Lucía",
+      "support": [
+        "Tomás"
+      ],
+      "depends_on": [
+        "F00"
+      ],
+      "status": "QUEUED",
+      "deliverable": "ADM2/ADM3 geometry and geocode uncertainty card; local versus neighboring project exposure and N contamination diagnostic; available commuting/mobility proxies",
+      "acceptance": "States what location data actually identify, sensitivity to uncertain geometry, spillover/interference assumptions; no automatic ADM3 upgrade or buffer hunting."
+    },
+    {
+      "id": "F04",
+      "name": "Outcome alignment and observability",
+      "owner": "Amara",
+      "support": [
+        "Tomás"
+      ],
+      "depends_on": [
+        "F00"
+      ],
+      "status": "QUEUED",
+      "deliverable": "Theory-to-outcome map (ACLED/UCDP violence categories; Afrobarometer stability/attitudes where available); chronology/coverage/zero semantics; precision and minimally meaningful effect assessment",
+      "acceptance": "Small predeclared outcome family; timing and availability audited; separate synthetic detector capability from real substantive inference; no outcome selected by p-value."
+    },
+    {
+      "id": "F05",
+      "name": "Cross-diagnostic candidate designs and stopping rules",
+      "owner": "Amara",
+      "support": [
+        "Tomás",
+        "Lucía"
+      ],
+      "depends_on": [
+        "F01",
+        "F02",
+        "F03",
+        "F04"
+      ],
+      "status": "QUEUED",
+      "deliverable": "Rank at most two bounded designs: one primary J–N strategy and one complementary mechanism/measurement strategy, with evidence requirements and reasons to stop",
+      "acceptance": "Each design states estimand, treated/control population, exposure clock, assumptions, falsification, inference unit and precision target; unsupported designs marked infeasible."
+    },
+    {
+      "id": "F06",
+      "name": "Independent review and Director decision memo",
+      "owner": "Ruth",
+      "support": [
+        "Amara"
+      ],
+      "depends_on": [
+        "F05"
+      ],
+      "status": "QUEUED",
+      "deliverable": "Independent review plus ≤3-page decision memo: PROCEED_SPECIFIED_DESIGN / IMPROVE_MEASUREMENT_FIRST / DESCRIPTIVE_ONLY_OR_STOP",
+      "acceptance": "Separates measurement, selection, power, spatial interference, and identification; explains possible credible null; Director chooses before any new empirical execution."
+    }
+  ],
+  "decision_gate": {
+    "ready_when": "F00–F06 evidence and review present; no promotion on status words alone",
+    "decisions": [
+      "PROCEED_SPECIFIED_DESIGN",
+      "IMPROVE_MEASUREMENT_FIRST",
+      "DESCRIPTIVE_ONLY_OR_STOP"
+    ],
+    "next_action": "Manual pull by Director after other Scientific Council business"
+  },
+  "reference_docs": [
+    "docs/experiments/W8_ADM2_JON_SCIENTIFIC_DESIGN_V0.md",
+    "docs/experiments/W8_ADM2_JON_SCIENTIFIC_RESULTS_20261116.md",
+    "docs/experiments/W7_CLASSIFICATION_CONTROL.md"
+  ],
+  "privacy": "No row-level outcome/project records committed to Git. Project-level protected source evidence stays in governed external source storage."
+}
