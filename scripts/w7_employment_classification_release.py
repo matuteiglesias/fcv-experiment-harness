@@ -39,12 +39,16 @@ def main() -> None:
     p.add_argument("--output-dir", type=Path, required=True)
     p.add_argument("--annotation-file", type=Path)
     args = p.parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    # A released run is immutable. Replays must use a new versioned directory;
+    # never silently overwrite earlier classifications or receipts.
+    if args.output_dir.exists():
+        p.error("--output-dir already exists; choose a fresh versioned release directory")
     dim, bridge, panel = (pd.read_parquet(x) for x in (args.dimension, args.bridge, args.panel))
     ledger = build_project_ledger(dim, args.policy)
     if args.annotation_file:
         ledger = apply_editorial_annotations(ledger, read_annotations(args.annotation_file))
     exposure, out_panel = derive_exposure_panel(ledger, bridge, panel)
+    args.output_dir.mkdir(parents=True, exist_ok=False)
     ledger_path = args.output_dir / "w7_project_classification_ledger_v0.parquet"
     exposure_path = args.output_dir / "w7_project_area_classification_bridge_v0.parquet"
     panel_path = args.output_dir / "w7_classification_exposure_panel_v0.parquet"

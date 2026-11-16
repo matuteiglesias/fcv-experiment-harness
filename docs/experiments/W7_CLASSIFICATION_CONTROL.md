@@ -87,3 +87,12 @@ Measure how much independent area-period support definite jobs and nonjobs
 labels achieve, rather than relying on an arbitrary 120-project sample.
 Only a separate prespecified support/FE check can authorize jobs-vs-other
 VAC estimation.
+
+## Immutable release directories
+
+The release CLI refuses an existing `--output-dir` rather than silently
+replacing evidence, project labels or W7 outputs. A deterministic replay
+must use a **new** run directory and compare output SHA-256 digests with
+its predecessor. The original `w7-classification-control-20261116` derived
+run is preserved; only its aggregate receipt was extended with the donor
+support tallies after verifying that all three data-file hashes stayed equal.

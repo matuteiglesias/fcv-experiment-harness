@@ -123,6 +123,30 @@ class W7Tests(unittest.TestCase):
                 with self.assertRaises(W7ClassificationError):
                     apply_editorial_annotations(ledger, self.annotation(**kw))
 
+    def test_release_cli_fails_closed_on_existing_destination(self):
+        import subprocess
+        import sys
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as tmp:
+            old = Path(tmp) / "existing_release"
+            old.mkdir()
+            marker = old / "keep.txt"
+            marker.write_text("historical")
+            cmd = [
+                sys.executable, "scripts/w7_employment_classification_release.py",
+                "--dimension", str(Path(tmp) / "missing.parquet"),
+                "--bridge", str(Path(tmp) / "missing.parquet"),
+                "--panel", str(Path(tmp) / "missing.parquet"),
+                "--policy", "config/w7_native_sector_channels_v0.json",
+                "--output-dir", str(old),
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("already exists", result.stderr)
+            self.assertEqual(marker.read_text(), "historical")
+            self.assertEqual(list(old.iterdir()), [marker])
+
 
 if __name__ == "__main__":
     unittest.main()
