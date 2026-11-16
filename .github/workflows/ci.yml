@@ -73,6 +73,7 @@ jobs:
           python tests_w5_china_wb_vac.py
           python tests_w5_e2_e3.py
           python tests_w5_e4.py
+          python tests_jobs_classification_bridge.py
 
       - name: Verify active configs do not name the legacy ACLED aggregate
         run: |
