@@ -1,0 +1,56 @@
+{
+  "schema": "fcv.w7.native_sector_channels.v0",
+  "categories": [
+    "productive_enterprise",
+    "physical_infrastructure",
+    "skills_education",
+    "health_social",
+    "governance_finance",
+    "humanitarian_environment_other"
+  ],
+  "donors": {
+    "china": {
+      "AGRICULTURE, FORESTRY, FISHING": "productive_enterprise",
+      "BUSINESS AND OTHER SERVICES": "productive_enterprise",
+      "INDUSTRY, MINING, CONSTRUCTION": "productive_enterprise",
+      "COMMUNICATIONS": "physical_infrastructure",
+      "ENERGY": "physical_infrastructure",
+      "TRANSPORT AND STORAGE": "physical_infrastructure",
+      "WATER SUPPLY AND SANITATION": "physical_infrastructure",
+      "EDUCATION": "skills_education",
+      "HEALTH": "health_social",
+      "OTHER SOCIAL INFRASTRUCTURE AND SERVICES": "health_social",
+      "GOVERNMENT AND CIVIL SOCIETY": "governance_finance",
+      "GENERAL BUDGET SUPPORT": "governance_finance",
+      "TRADE POLICIES AND REGULATIONS": "governance_finance",
+      "EMERGENCY RESPONSE": "humanitarian_environment_other",
+      "GENERAL ENVIRONMENTAL PROTECTION": "humanitarian_environment_other",
+      "DEVELOPMENTAL FOOD AID/FOOD SECURITY ASSISTANCE": "humanitarian_environment_other",
+      "OTHER COMMODITY ASSISTANCE": "humanitarian_environment_other",
+      "OTHER MULTISECTOR": "humanitarian_environment_other",
+      "RECONSTRUCTION RELIEF AND REHABILITATION": "humanitarian_environment_other"
+    },
+    "world_bank": {
+      "Agriculture": "productive_enterprise",
+      "Agriculture, forestry, fishing": "productive_enterprise",
+      "Forestry": "productive_enterprise",
+      "Industry": "productive_enterprise",
+      "Mineral resources and mining": "productive_enterprise",
+      "Communications": "physical_infrastructure",
+      "Energy generation and supply": "physical_infrastructure",
+      "Transport and storage": "physical_infrastructure",
+      "Water supply and sanitation": "physical_infrastructure",
+      "Basic education": "skills_education",
+      "Education, level unspecified": "skills_education",
+      "Post-secondary education": "skills_education",
+      "Secondary education": "skills_education",
+      "Health": "health_social",
+      "Health, general": "health_social",
+      "Other social infrastructure and services": "health_social",
+      "Government and civil society, general": "governance_finance",
+      "Banking and financial services": "governance_finance",
+      "Trade policy and regulations": "governance_finance",
+      "General environmental protection": "humanitarian_environment_other"
+    }
+  }
+}
